@@ -1,0 +1,1838 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>TRACE-X — Explainable Fraud Investigation</title>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"}}
+</script>
+<script src="./config.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#070c14;--surface:#0c1421;--panel:#101b2b;--panel2:#0d1726;--border:#22334a;--text:#edf3fb;--muted:#8da1ba;--teal:#67e6c3;--blue:#80adff;--red:#ff7188;--amber:#f8c875;--violet:#c2a0ff;--font-body:"Inter",ui-sans-serif,system-ui,sans-serif;--font-display:"Space Grotesk",var(--font-body)}
+*{box-sizing:border-box}body{margin:0;font:13px/1.45 var(--font-body);background:var(--bg);color:var(--text);letter-spacing:.01em}
+button,input,select,textarea{font:inherit}button{cursor:pointer;border:none;background:none;color:inherit}
+.shell{min-height:100vh;display:grid;grid-template-columns:236px 1fr}
+aside{position:sticky;top:0;height:100vh;border-right:1px solid var(--border);background:#080e18ed;padding:22px 15px;display:flex;flex-direction:column;gap:25px;overflow-y:auto}
+.brand{display:flex;align-items:center;gap:10px;padding:0 7px}
+.logo{height:38px;width:38px;border-radius:12px;background:linear-gradient(135deg,#67e6c3,#80adff);display:grid;place-items:center;color:#07121b;font-size:20px;font-weight:900;}
+.brand strong{font-family:var(--font-display);letter-spacing:2px;font-size:15px}
+.brand small{display:block;color:#7f94ae;font-size:9px;letter-spacing:1.2px;margin-top:2px}
+.navgroup label{display:block;color:#637890;text-transform:uppercase;letter-spacing:1.5px;font-size:9px;padding:0 11px 8px}
+.nav{display:grid;gap:5px}
+.nav button{border:1px solid transparent;border-radius:9px;background:transparent;color:#8ea2bb;text-align:left;padding:11px 10px;display:flex;align-items:center;gap:11px}
+.nav button .ico{width:20px;text-align:center;color:#6f8aa9;font-size:15px}
+.nav button.active,.nav button:hover{background:#15253a;color:#f1f6ff;border-color:#2b4564}
+.nav button.active .ico{color:var(--teal)}
+.sidebottom{margin-top:auto;border:1px solid #3d3a2c;background:#1b1913;border-radius:11px;padding:12px}
+.sidebottom b{display:flex;align-items:center;gap:6px;color:var(--amber);font-size:10px;letter-spacing:.8px}
+.sidebottom p{font-size:10px;color:#b5a987;margin:7px 0 0}
+.led{width:6px;height:6px;border-radius:50%;background:var(--amber);display:inline-block}
+main{width:100%;max-width:1700px;margin:auto;padding:20px 24px 16px}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;margin-bottom:19px}
+.eyebrow{font-size:9px;text-transform:uppercase;letter-spacing:2px;color:var(--teal)}
+h1{font-family:var(--font-display);font-size:25px;letter-spacing:-.8px;font-weight:600;margin:5px 0 4px}
+.sub{color:var(--muted);font-size:11px}
+.actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pill{border:1px solid #31465e;background:#101c2c;border-radius:999px;padding:7px 10px;color:#b8c9de;font-size:10px}
+.btn{border:1px solid #2d435d;border-radius:8px;background:#14243a;color:#dce9f8;padding:9px 12px;font-size:11px;transition:all .2s}
+.btn:hover{filter:brightness(1.15)}
+.btn.primary{background:var(--teal);color:#07141a;border-color:var(--teal);font-weight:750}
+.btn.ghost{background:transparent}
+.btn.active-toggle{background:#1e2e47;border-color:var(--blue)}
+.banner{border:1px solid #66522e;background:#211c13;color:#d8c89f;border-radius:9px;padding:10px 13px;font-size:10px;margin-bottom:15px}
+.banner b{color:var(--amber);letter-spacing:.7px}
+.banner .right{float:right;color:#9e906d}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:14px}
+.metric{background:linear-gradient(135deg,#111d2e,#0c1421);border:1px solid var(--border);border-radius:12px;padding:14px 15px;position:relative;overflow:hidden}
+.metric:after{content:"";position:absolute;right:-22px;top:-25px;width:75px;height:75px;border:1px solid #2c425e;border-radius:50%;opacity:.55}
+.mlabel{color:var(--muted);font-size:10px}
+.mvalue{font-size:25px;font-weight:650;letter-spacing:-.8px;margin:7px 0 3px}
+.mhint{font-size:9px;color:#7187a2}
+.statusdot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--teal);margin-right:5px}
+.graph-area{position:relative;border:1px solid #2a405b;border-radius:13px;overflow:hidden;height:540px;background:radial-gradient(circle at 50% 45%,#13243a 0,#091321 55%,#050a14 100%);box-shadow:inset 0 0 80px rgba(2,8,18,.5)}
+#threejs-container{position:absolute;inset:0;width:100%;height:100%}
+.graph-overlay{position:absolute;top:12px;right:12px;display:flex;gap:6px;z-index:10;pointer-events:none}
+.floating-ctrl{background:#101b2b;border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:10px;color:var(--muted)}
+.graph-hint{position:absolute;left:14px;bottom:12px;color:#a8bad0;background:rgba(9,17,30,.82);border:1px solid #2a405b;border-radius:7px;padding:6px 9px;font-size:10px;z-index:10;pointer-events:none}.focus-ring{outline:2px solid var(--teal);outline-offset:2px}
+.graph-area:has(canvas:hover){border-color:#5078a7;box-shadow:inset 0 0 90px rgba(32,105,173,.22),0 0 28px rgba(45,133,203,.12)}
+.phase-strip{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-bottom:14px}.phase-card{background:#0d1726;border:1px solid var(--border);border-radius:9px;padding:9px 10px}.phase-card b{display:block;font-size:10px}.phase-card span{display:block;color:var(--muted);font-size:9px;margin-top:3px}.phase-card.done{border-color:#275d56}.phase-card.done b{color:var(--teal)}.phase-card.boundary{border-color:#574925}.phase-card.boundary b{color:var(--amber)}.reveal{opacity:0;transform:translateY(8px);transition:opacity .55s ease,transform .55s ease}.reveal.ready{opacity:1;transform:none}
+.mini-map{position:absolute;right:12px;bottom:12px;width:150px;height:86px;background:rgba(7,12,20,.86);border:1px solid var(--border);border-radius:7px;padding:5px;z-index:9;pointer-events:none}.mini-map svg{width:100%;height:100%}.mini-map line{stroke:#47617e;stroke-width:1}.mini-map circle{stroke:#07121b;stroke-width:1}
+.graph-dossier{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center;margin-top:10px;padding:10px 12px;background:linear-gradient(135deg,#0d1828,#0a1220);border:1px solid var(--border);border-radius:10px}.graph-dossier h3{margin:0 0 3px;font-size:10px;text-transform:uppercase;letter-spacing:1.1px;color:var(--muted)}.graph-dossier p{margin:0;color:#b9c9dc;font-size:10px;line-height:1.45}.path-route{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:7px}.path-node{padding:4px 7px;border-radius:999px;background:#1a263a;border:1px solid #38577a;color:var(--text);font-size:9px}.path-node.hot{border-color:var(--red);color:#ffd9df}.path-arrow{color:var(--violet);font-size:11px}.view-mode{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.view-mode .btn.active-toggle{border-color:var(--violet);color:#eadfff;background:#2a2142}
+.edge-inspector{display:none;margin-top:10px;padding:9px 10px;background:#0d1726;border:1px solid #38577a;border-radius:8px;font-size:10px;color:var(--muted)}.edge-inspector.show{display:block}.edge-inspector b{color:var(--text)}
+.checklist{display:grid;gap:6px}.checklist label{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:10px}.checklist input{accent-color:var(--teal)}
+@media(max-width:900px){.phase-strip{grid-template-columns:repeat(2,minmax(0,1fr))}.mini-map{display:none}.kvs{gap:8px 12px}.graph-dossier{grid-template-columns:1fr}.view-mode{justify-content:flex-start}}
+@media(max-width:520px){.kvs{grid-template-columns:1fr}}
+.grid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(350px,375px);gap:14px;align-items:start}.leftcol{display:grid;gap:10px;align-content:start}.rightcol{display:grid;gap:14px}
+.panel{background:linear-gradient(145deg,#101a29,#0c1420);border:1px solid var(--border);border-radius:13px;overflow:hidden;min-width:0}
+.ph{display:flex;align-items:center;justify-content:space-between;padding:13px 15px;border-bottom:1px solid var(--border)}
+.ph h2{margin:0;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
+.ph .tag{font-size:9px;color:var(--amber);border:1px solid #4a3a13;border-radius:999px;padding:3px 8px}
+.panel-body{padding:15px}
+.riskhead{display:flex;align-items:flex-end;justify-content:space-between}.risk-story{margin:12px 0;padding:10px 11px;background:#0d1726;border-left:3px solid var(--amber);border-radius:0 8px 8px 0;color:#c5d3e4;font-size:10px}.risk-story strong{display:block;color:var(--text);font-size:9px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}.pattern-chip{display:inline-block;margin-top:7px;color:var(--violet);font-size:9px;border:1px solid #493b6b;border-radius:999px;padding:3px 7px}
+.risklabel{color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:1px}
+.risknumber{font-size:28px;font-weight:700}
+.bar{height:6px;border-radius:4px;background:#1a263a;overflow:hidden;margin:10px 0}
+.bar > div{height:100%;border-radius:4px}
+.threshold{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-top:8px}
+.kvs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 16px;margin:15px 0 17px}
+.kv{min-width:0;display:grid;gap:4px;padding:8px 0;border-bottom:1px solid rgba(54,77,105,.45)}
+.kv label{color:var(--muted);font-size:9px;line-height:1.35;text-transform:uppercase;letter-spacing:.9px}
+.kv b{color:var(--text);font-size:11px;font-weight:600;line-height:1.45;letter-spacing:.15px;overflow-wrap:anywhere}
+.sectlabel{color:var(--muted);font-size:8px;text-transform:uppercase;letter-spacing:1px;margin:12px 0 8px;border-bottom:1px solid var(--border);padding-bottom:4px}
+legend-card .legend-title{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:8px}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:10px;margin-bottom:5px}
+.legend-swatch{width:10px;height:10px;border-radius:50%;display:inline-block}
+.explainbody{padding:13px}.evidence-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:11px}.evidence-list{display:grid;gap:7px}.evidence-card{display:grid;grid-template-columns:28px 1fr auto;gap:9px;align-items:start;width:100%;text-align:left;background:#0d1726;border:1px solid #253b56;border-radius:9px;padding:9px;transition:border-color .2s,background .2s}.evidence-card:hover,.evidence-card.active{background:#14263d;border-color:var(--blue)}.evidence-card b{font-size:11px}.evidence-card p{color:var(--muted);font-size:10px;margin:3px 0 0}.evidence-card .score{color:var(--teal);font-size:10px;font-weight:600}.evidence-card .evicon{width:24px;height:24px}.timeline-panel{margin-top:0}.timeline{padding:13px 16px}.timeline-item{position:relative;padding:0 0 12px 20px;border-left:1px solid #31506e}.timeline-item:last-child{padding-bottom:0}.timeline-item:before{content:"";position:absolute;left:-5px;top:3px;width:9px;height:9px;border-radius:50%;background:var(--teal);box-shadow:0 0 0 3px #102337}.timeline-item b{display:block;font-size:10px;color:var(--text)}.timeline-item p{margin:2px 0 0;color:var(--muted);font-size:10px}.timeline-time{color:var(--blue);font-size:9px;letter-spacing:.5px;text-transform:uppercase}
+.expintro{color:var(--muted);font-size:10px;margin-bottom:15px}
+.evitem{display:flex;gap:10px;margin-bottom:16px}
+.evicon{width:20px;height:20px;border-radius:6px;background:#1a263a;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--blue)}
+.confidence{height:4px;border-radius:3px;background:#1a263a;overflow:hidden;margin-top:8px}
+.confidence span{display:block;height:100%;background:linear-gradient(90deg,#67e6c3,#80adff)}
+.tablewrap{overflow-x:auto}
+.cases{width:100%;border-collapse:collapse;font-size:11px}
+.cases thead th{text-align:left;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:1px;padding:8px 12px;border-bottom:1px solid var(--border)}
+.cases tbody td{padding:7px 12px;border-bottom:1px solid #0f182a}
+.cases tbody tr:hover{background:#0f182a}
+.caseid{font-weight:500;color:var(--blue)}
+.badge-high{background:#4a1e2e;color:var(--red);border:1px solid #5a2a3a;border-radius:4px;padding:1px 6px;font-size:9px}
+.badge-mid{background:#3a321a;color:var(--amber);border:1px solid #5a522a;border-radius:4px;padding:1px 6px;font-size:9px}
+.badge-low{background:#1a3a33;color:var(--teal);border:1px solid #2a5a4a;border-radius:4px;padding:1px 6px;font-size:9px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#15253a;border:1px solid var(--border);color:var(--text);padding:10px 20px;border-radius:8px;font-size:11px;z-index:9999;opacity:0;transition:opacity .3s}
+.toast.show{opacity:1}
+.empty-state{text-align:center;padding:30px;color:var(--muted);font-size:11px}
+@media(max-width:1100px){.shell{grid-template-columns:70px 1fr}aside{padding:18px 9px}.metrics{grid-template-columns:repeat(2,1fr)}.graph-area{height:500px}}
+@media(max-width:680px){main{padding:10px}.grid{grid-template-columns:1fr}.graph-area{height:430px}.graph-hint{font-size:9px}.graph-overlay{top:8px;right:8px}.timeline{padding:12px}}
+</style>
+</head>
+<body>
+<div class="shell">
+<aside>
+ <div class="brand"><div class="logo">T</div><div><strong>TRACE-X</strong><small>GRAPH INTELLIGENCE</small></div></div>
+ <div class="navgroup"><label>Investigation workspace</label><nav class="nav">
+  <button class="active" data-view="overview"><span class="ico">◈</span><span class="navtext">Overview</span></button>
+  <button data-view="network"><span class="ico">◎</span><span class="navtext">Transaction graph</span></button>
+  <button data-view="explanations"><span class="ico">⌁</span><span class="navtext">Explanation evidence</span></button>
+  <button data-view="cases"><span class="ico">▤</span><span class="navtext">Case queue</span></button>
+ </nav></div>
+ <div style="margin-top:20px">
+  <div class="legend-card">
+   <div class="legend-title">Node categories</div>
+   <div class="legend-item"><span class="legend-swatch" style="background:var(--red)"></span>High-priority candidate (risk ≥ 70)</div>
+   <div class="legend-item"><span class="legend-swatch" style="background:var(--amber)"></span>Suspicious-looking (risk 45–69)</div>
+   <div class="legend-item"><span class="legend-swatch" style="background:var(--teal)"></span>Normal transaction (risk < 45)</div>
+  </div>
+  <div class="legend-card" style="margin-top:20px">
+   <div class="legend-title">Graph status</div>
+   <div id="webgl-status" class="legend-item"><span class="legend-swatch" style="background:var(--amber)"></span>Checking…</div>
+  </div>
+ </div>
+ <div class="sidebottom"><b><i class="led"></i> DEMO / NOT LIVE</b><p>Synthetic graph and illustrative scores. No trained GNN or explainer is connected yet.</p></div>
+</aside>
+<main>
+ <header class="top">
+  <div><div class="eyebrow">Financial forensics / workspace 01</div><h1 id="pageTitle">Investigation overview</h1><div class="sub">Inspect graph context, risk signals, and model-associated evidence in one workspace.</div></div>
+  <div class="actions"><span class="pill" id="datasetStatus">● Built-in demo dataset</span><button class="btn ghost" id="clearSelBtn">Clear selection</button><button class="btn ghost" id="resetBtn">Reset view</button><button class="btn" id="uploadDatasetBtn" title="Upload a transaction dataset CSV">⬆ Upload dataset</button><button class="btn ghost" id="demoDatasetBtn">Use demo dataset</button><button class="btn primary" id="exportBtn">Export case summary ↗</button></div>
+  <input type="file" id="datasetFileInput" accept=".csv,text/csv" style="display:none" aria-label="Upload dataset CSV file"/>
+ </header>
+ <div class="banner"><b>RESEARCH PROTOTYPE</b> — Scores are rule-based risk indicators for the active dataset, not trained-model predictions or confirmed fraud findings. Supplied labels are displayed separately.<span class="right">Human review required</span></div>
+ <section class="phase-strip" aria-label="Implementation phase status">
+  <div class="phase-card done"><b>01 · Graph intelligence</b><span>Depth, paths, hover, zoom</span></div>
+  <div class="phase-card done"><b>02 · Synthetic patterns</b><span>Metadata, clusters, flow types</span></div>
+  <div class="phase-card done"><b>03 · Evidence</b><span>Confidence and linked signals</span></div>
+  <div class="phase-card done"><b>04 · Investigation</b><span>Assignment, checklist, history</span></div>
+  <div class="phase-card done"><b>05 · Presentation</b><span>Reveal, minimap, accessibility</span></div>
+  <div class="phase-card boundary"><b>06 · Model boundary</b><span>Real inference not connected</span></div>
+ </section>
+ <section class="metrics">
+  <div class="metric"><div class="mlabel">Transactions</div><div class="mvalue" id="totalNodes">24</div><div class="mhint"><i class="statusdot"></i><span id="datasetSourceHint">Built-in demo graph</span></div></div>
+  <div class="metric"><div class="mlabel">Flagged transactions</div><div class="mvalue" id="highCount">04</div><div class="mhint">Rule-based indicator ≥ 70 / 100</div></div>
+  <div class="metric"><div class="mlabel">Graph edges</div><div class="mvalue" id="totalEdges">26</div><div class="mhint">Receiver → sender timestamp links</div></div>
+  <div class="metric"><div class="mlabel">Cases awaiting review</div><div class="mvalue" id="pendingCount">00</div><div class="mhint">Local prototype state</div></div>
+ </section>
+ <section class="grid">
+  <div class="leftcol">
+  <div class="panel" id="graphPanel">
+   <div class="ph"><div><h2>Transaction relationship graph</h2><p>Click a node to inspect its neighborhood and sample evidence.</p></div><span class="tag">DIRECTED · TRANSACTION NODES</span></div>
+   <div class="panel-body">
+    <div class="graph-controls" style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+     <input class="search" id="nodeSearch" placeholder="Search transaction ID…" aria-label="Search transaction ID" style="flex:1;min-width:140px"/>
+     <select id="riskFilter" aria-label="Filter by risk" style="background:#0d1726;border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:11px;color:var(--text)">
+      <option value="all">All risk bands</option>
+      <option value="high">Elevated ≥ 70</option>
+      <option value="medium">Review 45–69</option>
+      <option value="low">Lower &lt; 45</option>
+     </select>
+     <select id="graphDepth" aria-label="Graph neighborhood depth" style="background:#0d1726;border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:11px;color:var(--text)">
+      <option value="all">Full depth</option>
+      <option value="1">1-hop neighborhood</option>
+      <option value="2">2-hop neighborhood</option>
+     </select>
+     <button class="btn" id="fitNetworkBtn">Fit Network</button>
+     <button class="btn" id="focusNeighborhoodBtn">Focus neighborhood</button>
+     <button class="btn primary" id="tracePathBtn">Trace suspicious path</button>
+     <button class="btn" id="zoomOutBtn" aria-label="Zoom out">−</button>
+     <button class="btn" id="zoomInBtn" aria-label="Zoom in">+</button>
+     <button class="btn" id="toggleConnectionsBtn">Toggle connections</button>
+     <button class="btn" id="toggleParticlesBtn">Toggle particles</button>
+     <button class="btn" id="toggleLabelsBtn">Toggle labels</button>
+    </div>
+    <div class="graph-area">
+     <div id="threejs-container"></div>
+     <div class="graph-hint">Scroll to zoom · drag to orbit · right-drag to pan</div>
+    <div class="mini-map" aria-label="Network overview"><svg id="miniMapSvg" viewBox="0 0 760 430"></svg></div>
+    <div class="graph-overlay">
+      <div class="floating-ctrl" id="graphCount">24 nodes · 26 edges</div>
+     </div>
+     <div id="edgeInspector" class="edge-inspector" role="status" aria-live="polite"></div>
+    </div>
+    <div class="graph-dossier" id="graphDossier">
+     <div>
+      <h3>Cinematic overview</h3>
+      <p>Suspicious activity is being tracked through the most connected high-risk cluster while preserving the surrounding transaction context.</p>
+      <div class="path-route" id="pathRoute"></div>
+     </div>
+     <div class="view-mode">
+      <button class="btn active-toggle" id="viewOverviewBtn">Overview</button>
+      <button class="btn" id="viewEvidenceBtn">Evidence</button>
+      <button class="btn" id="viewTimelineBtn">Timeline</button>
+     </div>
+    </div>
+   </div>
+  </div>
+  <section class="panel dataset-panel">
+   <div class="ph"><div><h2>Dataset transactions</h2><p id="transactionTableSubtitle">Built-in demo records · select a row to inspect the graph node</p></div><span class="tag">ACTIVE DATASET</span></div>
+   <div class="tablewrap"><table class="cases"><thead><tr><th>Transaction</th><th>Timestamp</th><th>Sender</th><th>Receiver</th><th>Amount (INR)</th><th>Risk indicator</th><th>Supplied label</th></tr></thead><tbody id="transactionRows"><tr><td colspan="7" class="empty-state">Loading transactions…</td></tr></tbody></table></div>
+  </section>
+  </div>
+  <div class="rightcol">
+   <div class="panel">
+    <div class="ph"><div><h2>Risk assessment</h2><p id="selectedId">TX-1048 · synthetic record</p></div><span class="riskbadge" id="riskBadge" style="border:1px solid var(--border);border-radius:999px;padding:3px 10px;font-size:10px">ELEVATED · DEMO</span></div>
+    <div class="panel-body">
+     <div class="riskhead"><div><div class="risklabel">Illustrative risk score</div><div class="risknumber" id="riskNumber">--<small> / 100</small></div></div><span class="tag" id="riskClass">Not selected</span></div>
+     <div class="bar"><div id="riskBar"></div></div><div class="threshold"><span>Lower signal</span><span>Review threshold: 45</span><span>100</span></div>
+     <div class="risk-story" id="riskStory"><strong>Risk story</strong><span>Select a transaction to generate a concise investigation summary.</span></div>
+     <div class="divider"></div><div class="sectlabel">Transaction context</div>
+     <div class="kvs">
+      <div class="kv"><label>Amount</label><b id="amountField">Not available</b></div>
+      <div class="kv"><label>Time step</label><b id="timeStepField">Not available</b></div>
+      <div class="kv"><label>Total connections</label><b id="degreeField">Not available</b></div>
+      <div class="kv"><label>Incoming links</label><b id="incomingField">Not available</b></div>
+      <div class="kv"><label>Outgoing links</label><b id="outgoingField">Not available</b></div>
+      <div class="kv"><label>Neighboring transactions</label><b id="neighborCountField">Not available</b></div>
+      <div class="kv"><label>Review status</label><b id="reviewStatus">Unreviewed</b></div>
+      <div class="kv"><label>Category</label><b id="categoryField">Not available</b></div>
+       <div class="kv"><label>Account type</label><b id="accountTypeField">Not available</b></div>
+       <div class="kv"><label>Region</label><b id="regionField">Not available</b></div>
+       <div class="kv"><label>Pattern</label><b id="patternField">Not available</b></div>
+      </div>
+     <div class="divider"></div>
+     <div class="sectlabel">Investigation status</div>
+     <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <select id="statusSelect" style="flex:1;min-width:120px;background:#0d1726;border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:11px"><option value="unreviewed">Unreviewed</option><option value="under_review">Under review</option><option value="escalated">Escalated</option><option value="closed">Closed</option></select>
+      <button class="btn" id="saveStatusBtn">Save</button>
+     </div>
+     <div class="sectlabel" style="margin-top:12px">Analyst notes</div>
+     <textarea id="notesField" placeholder="Enter investigation notes…" style="width:100%;background:#0d1726;border:1px solid var(--border);border-radius:8px;padding:8px;font-size:11px;color:var(--text);resize:vertical;min-height:60px"></textarea>
+     <div style="display:flex;gap:6px;margin-top:8px;justify-content:flex-end">
+      <button class="btn" id="saveNotesBtn">Save notes</button>
+     </div>
+     <div class="sectlabel" style="margin-top:12px">Assignment and priority</div>
+     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <select id="priorityField" aria-label="Case priority" style="background:#0d1726;border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text)"><option value="standard">Standard priority</option><option value="high">High priority</option><option value="critical">Critical priority</option></select>
+      <input id="assigneeField" aria-label="Case assignee" placeholder="Reviewer / team" style="background:#0d1726;border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text)"/>
+     </div>
+     <div class="sectlabel" style="margin-top:12px">Investigation checklist</div>
+     <div class="checklist"><label><input type="checkbox" data-check="graph"/> Review graph neighborhood</label><label><input type="checkbox" data-check="evidence"/> Validate evidence signals</label><label><input type="checkbox" data-check="decision"/> Record analyst decision</label></div>
+     <div style="display:flex;gap:6px;margin-top:8px;justify-content:flex-end"><button class="btn" id="saveInvestigationBtn">Save investigation</button></div>
+     <div id="caseHistoryPanel" class="empty-state" style="margin-top:10px;text-align:left">No case history for this transaction.</div>
+    </div>
+   </div>
+   <div class="panel" id="evidencePanel">
+    <div class="ph"><div><h2>Explanation evidence</h2><p id="evidenceSubtitle">Evidence linked to the selected transaction</p></div><span class="tag">LOCAL EXPLANATION</span></div>
+    <div class="explainbody">
+     <div class="expintro" id="demoNotice">Demonstration mode: evidence is generated from synthetic graph signals. It is not a fraud finding.</div>
+     <div class="evidence-actions"><button class="btn primary" id="explainRiskBtn">Explain risk</button><button class="btn ghost" id="clearEvidenceBtn">Clear focus</button></div>
+     <div class="evidence-list" id="evidenceList"><div class="empty-state">Select a transaction to generate linked evidence.</div></div>
+     <div id="evidenceDetail" class="edge-inspector"></div>
+     <div class="evitem" style="margin-top:14px"><div class="evicon">✓</div><div><b>Interpretation guardrail</b><p>A highlighted relationship is model-associated evidence, not causal proof of criminal intent.</p></div></div>
+    </div>
+   </div>
+   <div class="panel timeline-panel" id="timelinePanel">
+    <div class="ph"><div><h2>Investigation timeline</h2><p>Analyst activity for the selected transaction</p></div><span class="tag" id="timelineStatus">READY</span></div>
+    <div class="timeline" id="timeline"><div class="empty-state">Select a transaction to begin an investigation.</div></div>
+   </div>
+  </div>
+  </section>
+ <section class="panel casepanel" id="casePanel">
+  <div class="ph"><div><h2>Investigation queue</h2><p>Transactions flagged for review · select a row to inspect</p></div><span class="tag">HUMAN-IN-THE-LOOP</span></div>
+  <div class="tablewrap"><table class="cases"><thead><tr><th>Transaction</th><th>Score</th><th>Time</th><th>Links</th><th>Status</th><th>Notes</th><th>Action</th></tr></thead><tbody id="caseRows"><tr><td colspan="7" class="empty-state">No flagged cases yet. Select a transaction and change its status to add it to the queue.</td></tr></tbody></table></div>
+ </section>
+ <footer class="footer" style="display:flex;justify-content:space-between;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);color:var(--muted);font-size:10px"><span>TRACE-X · Explainable Fraud Investigation Using GNNs</span><span>Prototype v1.0 · Synthetic sample data · No live inference</span></footer>
+</main>
+</div>
+<div class="toast" id="toast">Message</div>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+let nodes = [
+ {id:"TX-1008",x:125,y:65,risk:21,step:27,amount:"0.8 BTC"},
+ {id:"TX-1015",x:110,y:210,risk:33,step:28,amount:"1.2 BTC"},
+ {id:"TX-1021",x:250,y:280,risk:19,step:29,amount:"2.1 BTC"},
+ {id:"TX-1032",x:230,y:125,risk:83,step:30,amount:"3.5 BTC"},
+ {id:"TX-1048",x:375,y:205,risk:78,step:31,amount:"4.7 BTC"},
+ {id:"TX-1051",x:510,y:112,risk:71,step:31,amount:"2.3 BTC"},
+ {id:"TX-1060",x:570,y:225,risk:24,step:32,amount:"0.9 BTC"},
+ {id:"TX-1072",x:430,y:320,risk:55,step:33,amount:"1.8 BTC"},
+ {id:"TX-1088",x:650,y:310,risk:14,step:34,amount:"0.5 BTC"},
+ {id:"TX-1091",x:630,y:70,risk:62,step:35,amount:"2.0 BTC"},
+ {id:"TX-1102",x:320,y:355,risk:74,step:36,amount:"3.1 BTC"},
+ {id:"TX-1110",x:520,y:365,risk:29,step:36,amount:"0.7 BTC"},
+ {id:"TX-1120",x:690,y:170,risk:43,step:37,amount:"1.0 BTC"},
+ {id:"TX-1134",x:70,y:330,risk:12,step:38,amount:"0.4 BTC"},
+ {id:"TX-1140",x:345,y:75,risk:49,step:39,amount:"1.5 BTC"},
+ {id:"TX-1152",x:170,y:365,risk:68,step:40,amount:"2.8 BTC"},
+ {id:"TX-1160",x:65,y:145,risk:75,step:41,amount:"3.2 BTC"},
+ {id:"TX-1167",x:590,y:390,risk:18,step:42,amount:"0.6 BTC"},
+ {id:"TX-1173",x:700,y:250,risk:53,step:43,amount:"1.3 BTC"},
+ {id:"TX-1184",x:440,y:45,risk:31,step:44,amount:"1.9 BTC"},
+ {id:"TX-1192",x:275,y:45,risk:72,step:45,amount:"2.5 BTC"},
+ {id:"TX-1201",x:185,y:175,risk:38,step:46,amount:"0.8 BTC"},
+ {id:"TX-1214",x:710,y:365,risk:81,step:47,amount:"4.2 BTC"},
+ {id:"TX-1220",x:45,y:270,risk:27,step:48,amount:"1.6 BTC"}
+];
+let edges = [
+ ["TX-1008","TX-1032"],["TX-1015","TX-1032"],["TX-1032","TX-1048"],["TX-1021","TX-1048"],["TX-1048","TX-1051"],
+ ["TX-1048","TX-1060"],["TX-1051","TX-1091"],["TX-1051","TX-1120"],["TX-1060","TX-1088"],["TX-1048","TX-1072"],
+ ["TX-1072","TX-1102"],["TX-1072","TX-1110"],["TX-1134","TX-1021"],["TX-1102","TX-1152"],["TX-1140","TX-1051"],
+ ["TX-1008","TX-1015"],["TX-1160","TX-1015"],["TX-1192","TX-1140"],["TX-1184","TX-1051"],["TX-1152","TX-1201"],
+ ["TX-1201","TX-1032"],["TX-1110","TX-1167"],["TX-1120","TX-1173"],["TX-1173","TX-1214"],["TX-1220","TX-1160"],["TX-1214","TX-1167"]
+];
+const patternByNode = {
+ "TX-1032":"Inbound aggregation","TX-1048":"Through-flow handoff","TX-1051":"Outbound fan-out",
+ "TX-1072":"Layered movement","TX-1102":"Circular-flow candidate","TX-1152":"Burst activity",
+ "TX-1160":"Suspicious cluster","TX-1192":"Burst activity","TX-1214":"Suspicious cluster"
+};
+nodes.forEach((n, index) => {
+ n.currency = "BTC";
+ n.accountType = index % 5 === 0 ? "Exchange" : index % 3 === 0 ? "Merchant" : "Individual";
+ n.region = ["NA","EU","APAC","LATAM"][index % 4];
+ n.timestamp = `2026-04-${String(8 + (n.step % 18)).padStart(2, "0")}T${String(8 + (n.step % 10)).padStart(2, "0")}:15:00Z`;
+ n.pattern = patternByNode[n.id] || (n.risk >= 70 ? "Elevated transfer" : "Baseline activity");
+ n.cluster = n.risk >= 70 ? "Cluster A · elevated" : n.risk >= 45 ? "Cluster B · review" : "Cluster C · baseline";
+});
+let nodeMap = Object.fromEntries(nodes.map(n => [n.id, n]));
+let state = {
+ selected: "TX-1048",
+ caseData: {},
+ showConnections: true,
+ showParticles: true,
+ showLabels: true,
+ neighborhoodOnly: false,
+ evidenceFocus: null,
+ tracePath: [],
+ traceActive: false,
+ traceProgress: 0,
+ hoveredNode: null,
+ timeline: [],
+ graphDepth: "all",
+ hoveredEdge: null,
+ threeInitialized: false
+};
+let scene, camera, renderer, controls, raycaster, pointer;
+let nodeMeshes = new Map();
+let edgeLines = new Map();
+let edgeArrows = new Map();
+let labelSprites = new Map();
+let connectionParticles = new Map();
+let nodeRings = new Map();
+const clock = new THREE.Clock();
+const nodeGeometry = new THREE.SphereGeometry(1.35, 36, 36);
+const particleGroup = new THREE.Group();
+
+function riskCategory(risk) {
+ if (risk >= 70) return "high";
+ if (risk >= 45) return "mid";
+ return "low";
+}
+function riskColorObj(risk) {
+ if (risk >= 70) return { r: 1, g: 0.46, b: 0.53 };
+ if (risk >= 45) return { r: 0.97, g: 0.78, b: 0.46 };
+ return { r: 0.40, g: 0.90, b: 0.81 };
+}
+
+function getNeighbors(id) {
+ const s = new Set();
+ edges.forEach(([a, b]) => {
+  if (a === id) s.add(b);
+  if (b === id) s.add(a);
+ });
+ return s;
+}
+function getNeighborsAtDepth(id, depth) {
+ const result = new Set([id]);
+ let frontier = new Set([id]);
+ for (let level = 0; level < depth; level++) {
+  const next = new Set();
+  frontier.forEach(current => getNeighbors(current).forEach(neighbor => {
+   if (!result.has(neighbor)) next.add(neighbor);
+  }));
+  next.forEach(nodeId => result.add(nodeId));
+  frontier = next;
+ }
+ return result;
+}
+function getEdgeEndpoints(id) {
+ const incoming = [];
+ const outgoing = [];
+ edges.forEach(([a, b]) => {
+  if (a === id) outgoing.push(b);
+  if (b === id) incoming.push(a);
+ });
+ return { incoming, outgoing };
+}
+function countEdgeDegrees() {
+ const incoming = new Map();
+ const outgoing = new Map();
+ edges.forEach(([a, b]) => {
+  outgoing.set(a, (outgoing.get(a) || 0) + 1);
+  incoming.set(b, (incoming.get(b) || 0) + 1);
+ });
+ return { incoming, outgoing };
+}
+
+function amountValue(amount) {
+ return Number.parseFloat(amount) || 0;
+}
+
+function evidenceFor(n) {
+ const { incoming, outgoing } = getEdgeEndpoints(n.id);
+ const neighbors = getNeighbors(n.id);
+ const elevated = [...neighbors].filter(id => nodeMap[id].risk >= 70).length;
+ const linkedAmount = [...incoming, ...outgoing].reduce((sum, id) => sum + amountValue(nodeMap[id].amount), 0);
+ const localAverage = linkedAmount / Math.max(1, neighbors.size);
+ const deviation = Math.round((amountValue(n.amount) / Math.max(0.1, localAverage)) * 100);
+ const entries = [
+  { id: "network", icon: "↗", title: "Elevated-risk neighborhood", text: `${elevated} of ${neighbors.size} connected transactions are elevated-risk.`, score: `${elevated}/${neighbors.size}`, confidence: Math.min(96, 58 + elevated * 12), nodes: new Set([n.id, ...neighbors]), edges: edges.filter(([a, b]) => a === n.id || b === n.id) },
+  { id: "velocity", icon: "⌁", title: "Velocity anomaly", text: `${outgoing.length} outbound link${outgoing.length === 1 ? "" : "s"} leave this transaction across adjacent timesteps.`, score: `${outgoing.length} out`, confidence: Math.min(94, 62 + outgoing.length * 9), nodes: new Set([n.id, ...outgoing]), edges: edges.filter(([a]) => a === n.id) },
+  { id: "amount", icon: "₿", title: "Local amount deviation", text: `The ${n.amount} transaction is approximately ${deviation}% of the connected-neighborhood average.`, score: `${deviation}%`, confidence: Math.min(91, 55 + Math.abs(deviation - 100) / 2), nodes: new Set([n.id, ...neighbors]), edges: edges.filter(([a, b]) => a === n.id || b === n.id) },
+  { id: "concentration", icon: "⌾", title: "Destination concentration", text: `${outgoing.length ? "Outbound flow is concentrated across " + outgoing.length + " destination" + (outgoing.length === 1 ? "" : "s") : "No outbound destination concentration detected"}.`, score: `${outgoing.length} dest.`, confidence: outgoing.length ? 78 : 64, nodes: new Set([n.id, ...outgoing]), edges: edges.filter(([a]) => a === n.id) }
+ ];
+ if (incoming.length && outgoing.length) {
+  entries.push({ id: "flow", icon: "◌", title: "Through-flow structure", text: `Funds enter from ${incoming.length} link${incoming.length === 1 ? "" : "s"} and leave through ${outgoing.length} link${outgoing.length === 1 ? "" : "s"}, creating a traceable handoff.`, score: `${incoming.length} → ${outgoing.length}`, confidence: 86, nodes: new Set([n.id, ...neighbors]), edges: edges.filter(([a, b]) => a === n.id || b === n.id) });
+ }
+ if (n.pattern.includes("cluster") || n.pattern.includes("Cluster")) entries.push({ id: "cluster", icon: "◎", title: "Suspicious cluster membership", text: `${n.id} belongs to ${n.cluster}, a synthetic group with elevated neighboring activity.`, score: n.cluster, confidence: 82, nodes: new Set([n.id, ...neighbors]), edges: edges.filter(([a, b]) => a === n.id || b === n.id) });
+ if (n.pattern.includes("Burst")) entries.push({ id: "burst", icon: "✦", title: "Burst activity", text: `Adjacent timesteps indicate a synthetic burst pattern around ${n.step}.`, score: `t=${n.step}`, confidence: 75, nodes: new Set([n.id, ...neighbors]), edges: edges.filter(([a, b]) => a === n.id || b === n.id) });
+ return entries;
+}
+
+function patternFor(n) {
+ if (n.pattern) return n.pattern;
+ const { incoming, outgoing } = getEdgeEndpoints(n.id);
+ if (incoming.length >= 2 && outgoing.length >= 2) return "Through-flow handoff";
+ if (outgoing.length >= 3) return "Outbound fan-out";
+ if (incoming.length >= 3) return "Inbound aggregation";
+ if (incoming.length && outgoing.length) return "Layered movement";
+ return "Isolated activity";
+}
+
+function riskStoryFor(n) {
+ const { incoming, outgoing } = getEdgeEndpoints(n.id);
+ const elevated = [...getNeighbors(n.id)].filter(id => nodeMap[id].risk >= 70).length;
+ const pattern = patternFor(n);
+ if (n.risk >= 70) {
+  return `TX-${n.id.split("-")[1]} is elevated because its ${pattern.toLowerCase()} connects ${elevated} elevated-risk neighbor${elevated === 1 ? "" : "s"} and moves ${n.amount} through a ${incoming.length}-in / ${outgoing.length}-out relationship.`;
+ }
+ if (n.risk >= 45) {
+  return `TX-${n.id.split("-")[1]} warrants review for ${pattern.toLowerCase()} activity across ${incoming.length + outgoing.length} directed connection${incoming.length + outgoing.length === 1 ? "" : "s"}.`;
+ }
+ return `TX-${n.id.split("-")[1]} is a lower-risk sample with ${incoming.length + outgoing.length} directed connection${incoming.length + outgoing.length === 1 ? "" : "s"} and no immediate elevated-risk concentration.`;
+}
+
+function buildSuspiciousPath(startId) {
+ const start = nodeMap[startId];
+ if (!start) return [startId];
+ const path = [startId];
+ const visited = new Set([startId]);
+ const queue = [{ id: startId, depth: 0 }];
+ const weightedNodes = new Map();
+
+ while (queue.length && path.length < 9) {
+  const current = queue.shift();
+  const currentNode = nodeMap[current.id];
+  const neighbors = [...edges]
+   .filter(([a, b]) => (a === current.id || b === current.id) && !(a === current.id && b === current.id))
+   .map(([a, b]) => (a === current.id ? b : a))
+   .map(id => nodeMap[id])
+   .filter(Boolean)
+   .sort((a, b) => {
+    const aScore = a.risk + (a.step * 2) + (a.amount ? amountValue(a.amount) * 18 : 0) + (getNeighbors(a.id).size * 4);
+    const bScore = b.risk + (b.step * 2) + (b.amount ? amountValue(b.amount) * 18 : 0) + (getNeighbors(b.id).size * 4);
+    return bScore - aScore;
+   });
+
+  neighbors.forEach(node => {
+   if (visited.has(node.id)) return;
+   const score = node.risk + (node.step * 2) + (node.amount ? amountValue(node.amount) * 18 : 0) + (getNeighbors(node.id).size * 5);
+   weightedNodes.set(node.id, (weightedNodes.get(node.id) || 0) + score);
+   visited.add(node.id);
+   path.push(node.id);
+   queue.push({ id: node.id, depth: current.depth + 1 });
+  });
+
+  if (currentNode && currentNode.risk >= 60 && current.depth >= 2) {
+   const nextCandidates = [...new Set(edges.flatMap(([a, b]) => [a, b]))]
+    .filter(id => id !== startId && !visited.has(id))
+    .map(id => ({ id, score: (nodeMap[id]?.risk || 0) + (nodeMap[id]?.step || 0) * 3 + (getNeighbors(id).size * 5) }))
+    .sort((a, b) => b.score - a.score);
+   if (nextCandidates.length) {
+    const nxt = nextCandidates[0];
+    if (!visited.has(nxt.id)) {
+     visited.add(nxt.id);
+     path.push(nxt.id);
+     queue.push({ id: nxt.id, depth: current.depth + 1 });
+    }
+   }
+  }
+ }
+
+ const finalPath = [...new Set(path)];
+ if (finalPath.length < 6) {
+  const backup = [...new Set(edges.flatMap(([a, b]) => [a, b]))]
+   .filter(id => id !== startId && !finalPath.includes(id))
+   .sort((a, b) => ((nodeMap[b]?.risk || 0) + (nodeMap[b]?.step || 0) * 3 + (getNeighbors(b).size * 5)) - ((nodeMap[a]?.risk || 0) + (nodeMap[a]?.step || 0) * 3 + (getNeighbors(a).size * 5)))
+   .slice(0, 8 - finalPath.length);
+  backup.forEach(id => { if (finalPath.length < 8) finalPath.push(id); });
+ }
+
+ return finalPath.slice(0, 8);
+}
+
+function addTimelineEvent(title, detail) {
+ const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+ state.timeline.unshift({ time, title, detail });
+ renderTimeline();
+}
+
+function renderTimeline() {
+ const timeline = document.getElementById("timeline");
+ const status = document.getElementById("timelineStatus");
+ if (!state.timeline.length) {
+  timeline.innerHTML = '<div class="empty-state">Select a transaction to begin an investigation.</div>';
+  status.textContent = "READY";
+  return;
+ }
+ timeline.innerHTML = state.timeline.slice(0, 6).map(item => `
+  <div class="timeline-item"><span class="timeline-time">${item.time}</span><b>${item.title}</b><p>${item.detail}</p></div>
+ `).join("");
+ status.textContent = state.traceActive ? "TRACING" : "ACTIVE";
+}
+
+function renderGraphDossier() {
+ const container = document.getElementById("pathRoute");
+ if (!container) return;
+ const route = state.tracePath.length ? state.tracePath : (state.selected ? [...getNeighbors(state.selected)].slice(0, 5) : []);
+ const chips = route.slice(0, 7).map((id, index) => {
+  const n = nodeMap[id];
+  const hot = n && n.risk >= 70;
+  return `<span class="path-node ${hot ? "hot" : ""}">${id}</span>${index < route.length - 1 ? '<span class="path-arrow">→</span>' : ''}`;
+ }).join('');
+ container.innerHTML = chips || '<span class="path-node">No route selected</span>';
+}
+
+function traceSuspiciousPath() {
+ if (!state.selected) {
+  toast("Select a transaction first.");
+  return;
+ }
+ if (state.traceActive) {
+  state.traceActive = false;
+  state.traceProgress = 0;
+  updateHighlight();
+  document.getElementById("tracePathBtn").textContent = "Trace suspicious path";
+  renderTimeline();
+  renderGraphDossier();
+  toast("Path trace paused.");
+  return;
+ }
+ state.tracePath = buildSuspiciousPath(state.selected);
+ state.traceProgress = 0;
+ state.traceActive = true;
+ state.evidenceFocus = null;
+ addTimelineEvent("Suspicious path trace started", `${state.tracePath.length} linked transactions are being reviewed from ${state.selected}.`);
+ document.getElementById("tracePathBtn").textContent = "Pause path trace";
+ renderGraphDossier();
+ applyFilterVisibility();
+ fitNetworkView();
+}
+
+function toast(msg) {
+ const t = document.getElementById("toast");
+ t.textContent = msg;
+ t.classList.add("show");
+ setTimeout(() => t.classList.remove("show"), 2800);
+}
+
+function checkWebGL() {
+ const status = document.getElementById("webgl-status");
+ const canvas = document.createElement("canvas");
+ const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+ if (gl) {
+  status.innerHTML = '<span class="legend-swatch" style="background:var(--teal)"></span>WebGL available';
+  return true;
+ }
+ status.innerHTML = '<span class="legend-swatch" style="background:var(--red)"></span>WebGL unavailable';
+ document.getElementById("threejs-container").innerHTML =
+  '<div style="color:var(--red);padding:20px;text-align:center">WebGL is required for the 3D transaction network. Please use a modern browser with WebGL support.</div>';
+ return false;
+}
+
+function generateLayout() {
+ const map = new Map();
+ nodes.forEach((n, index) => {
+  const drift = ((index % 5) - 2) * 0.7;
+  map.set(n.id, {
+   x: (n.x - 380) / 16.5,
+   y: (230 - n.y) / 16.5,
+   z: (n.risk >= 70 ? 4.2 : n.risk >= 45 ? 2.8 : 1.7) + drift
+  });
+ });
+ return map;
+}
+let layout = generateLayout();
+
+function renderMiniMap() {
+ const svg = document.getElementById("miniMapSvg");
+ if (!svg) return;
+ const lines = edges.map(([a, b]) => {
+  const source = nodeMap[a], target = nodeMap[b];
+  return `<line x1="${source.x}" y1="${source.y}" x2="${target.x}" y2="${target.y}"/>`;
+ }).join("");
+ const circles = nodes.map(n => `<circle cx="${n.x}" cy="${n.y}" r="${n.id === state.selected ? 6 : 4}" fill="${n.risk >= 70 ? "#ff7188" : n.risk >= 45 ? "#f8c875" : "#67e6c3"}"/>`).join("");
+ svg.innerHTML = lines + circles;
+}
+
+const nodeMaterials = {
+ high: new THREE.MeshPhysicalMaterial({ color: 0xff477e, metalness: 1, roughness: 0.16, clearcoat: 1, clearcoatRoughness: 0.08, envMapIntensity: 1.7, emissive: 0x6f1237, emissiveIntensity: 0.8, sheen: 0.7, sheenColor: new THREE.Color(0xffb3d0) }),
+ mid: new THREE.MeshPhysicalMaterial({ color: 0xffa62b, metalness: 1, roughness: 0.16, clearcoat: 1, clearcoatRoughness: 0.08, envMapIntensity: 1.7, emissive: 0x713b05, emissiveIntensity: 0.75, sheen: 0.65, sheenColor: new THREE.Color(0xffe0a1) }),
+ low: new THREE.MeshPhysicalMaterial({ color: 0x22d3ee, metalness: 1, roughness: 0.16, clearcoat: 1, clearcoatRoughness: 0.08, envMapIntensity: 1.7, emissive: 0x064c68, emissiveIntensity: 0.65, sheen: 0.65, sheenColor: new THREE.Color(0xa6f7ff) }),
+ unknown: new THREE.MeshPhysicalMaterial({ color: 0x9cb8dc, metalness: 0.9, roughness: 0.2, clearcoat: 0.9, clearcoatRoughness: 0.14, emissive: 0x173b78, emissiveIntensity: 0.4, opacity: 0.7, transparent: true })
+};
+const nodePalette = [
+ { color: 0xff477e, emissive: 0x6f1237, sheen: 0xffb3d0 },
+ { color: 0xffa62b, emissive: 0x713b05, sheen: 0xffe0a1 },
+ { color: 0x22d3ee, emissive: 0x064c68, sheen: 0xa6f7ff },
+ { color: 0xa78bfa, emissive: 0x38206f, sheen: 0xe0d5ff },
+ { color: 0x84cc16, emissive: 0x2d5106, sheen: 0xd8ff9b },
+ { color: 0xf472b6, emissive: 0x64133e, sheen: 0xffd0e7 },
+ { color: 0x38bdf8, emissive: 0x073f70, sheen: 0xbdeaff }
+];
+function nodeMaterialFor(node, opacity = 1) {
+ const hash = [...node.id].reduce((sum, char) => sum + char.charCodeAt(0), 0);
+ const palette = nodePalette[hash % nodePalette.length];
+ return new THREE.MeshPhysicalMaterial({
+  color: palette.color, metalness: 1, roughness: 0.15, clearcoat: 1,
+  clearcoatRoughness: 0.08, envMapIntensity: 1.7, emissive: palette.emissive,
+  emissiveIntensity: 0.72, sheen: 0.65, sheenColor: new THREE.Color(palette.sheen),
+  opacity, transparent: opacity < 1
+ });
+}
+const selectedMaterial = new THREE.MeshPhysicalMaterial({ color: 0xfafcff, metalness: 1, roughness: 0.09, clearcoat: 1, envMapIntensity: 1.7, emissive: 0x7ab3ff, emissiveIntensity: 1.1 });
+const highlightedMaterial = new THREE.MeshPhysicalMaterial({ color: 0xffd7e2, metalness: 1, roughness: 0.12, clearcoat: 1, envMapIntensity: 1.6, emissive: 0x7e213d, emissiveIntensity: 0.95 });
+const edgeMat = new THREE.LineBasicMaterial({ color: 0x52749e, transparent: true, opacity: 0.9 });
+const highlightEdgeMat = new THREE.LineBasicMaterial({ color: 0xff7188, transparent: true, opacity: 0.7 });
+const incomingEdgeMat = new THREE.LineBasicMaterial({ color: 0x67e6c3, transparent: true, opacity: 0.85 });
+const outgoingEdgeMat = new THREE.LineBasicMaterial({ color: 0xf8c875, transparent: true, opacity: 0.85 });
+const pathEdgeMat = new THREE.LineBasicMaterial({ color: 0xc2a0ff, transparent: true, opacity: 1 });
+const pathNodeMaterial = new THREE.MeshStandardMaterial({ color: 0xc2a0ff, emissive: 0x54339b, emissiveIntensity: 1.2 });
+
+function makeTextSprite(text) {
+ const canvas = document.createElement('canvas');
+ const ctx = canvas.getContext('2d');
+ const fontSize = 18;
+ ctx.font = `${fontSize}px Inter, sans-serif`;
+ const textWidth = ctx.measureText(text).width;
+ canvas.width = textWidth + 18;
+ canvas.height = fontSize + 12;
+ ctx.font = `${fontSize}px Inter, sans-serif`;
+ ctx.fillStyle = 'rgba(10, 20, 40, 0.86)';
+ ctx.fillRect(0, 0, canvas.width, canvas.height);
+ ctx.strokeStyle = '#304a6e';
+ ctx.strokeRect(1, 1, canvas.width - 2, canvas.height - 2);
+ ctx.fillStyle = '#edf3fb';
+ ctx.fillText(text, 8, fontSize + 3);
+ const texture = new THREE.CanvasTexture(canvas);
+ const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
+ const sprite = new THREE.Sprite(material);
+ sprite.scale.set(4.6, 1.8, 1);
+ return sprite;
+}
+
+function buildEdges() {
+ edgeLines.forEach((line) => scene.remove(line));
+ edgeArrows.forEach((arrow) => scene.remove(arrow));
+ edgeLines.clear();
+ edgeArrows.clear();
+ edges.forEach(([a, b]) => {
+  const pa = layout.get(a);
+  const pb = layout.get(b);
+  if (!pa || !pb) return;
+  const points = [new THREE.Vector3(pa.x, pa.y, pa.z), new THREE.Vector3(pb.x, pb.y, pb.z)];
+  const geom = new THREE.BufferGeometry().setFromPoints(points);
+  const line = new THREE.Line(geom, edgeMat.clone());
+  line.userData = { source: a, target: b };
+  edgeLines.set(a + "->" + b, line);
+  const direction = new THREE.Vector3().subVectors(new THREE.Vector3(pb.x, pb.y, pb.z), new THREE.Vector3(pa.x, pa.y, pa.z)).normalize();
+  const arrow = new THREE.Mesh(new THREE.ConeGeometry(0.18, 0.55, 12), outgoingEdgeMat.clone());
+  arrow.position.set(pb.x, pb.y, pb.z);
+  arrow.position.addScaledVector(direction, -0.75);
+  arrow.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction);
+  arrow.userData = { source: a, target: b };
+  edgeArrows.set(a + "->" + b, arrow);
+  if (state.showConnections) {
+   scene.add(line);
+   scene.add(arrow);
+  }
+ });
+}
+
+function buildNodeMeshes() {
+ nodeMeshes.forEach((m) => {
+  m.material.dispose();
+  scene.remove(m);
+ });
+ nodeMeshes.clear();
+ nodeRings.forEach((ring) => {
+  ring.geometry.dispose();
+  ring.material.dispose();
+  scene.remove(ring);
+ });
+ nodeRings.clear();
+ nodes.forEach((n) => {
+  const pos = layout.get(n.id);
+  if (!pos) return;
+  const cat = riskCategory(n.risk);
+  const mesh = new THREE.Mesh(nodeGeometry, nodeMaterialFor(n));
+  mesh.position.set(pos.x, pos.y, pos.z);
+  mesh.userData.nodeId = n.id;
+  mesh.userData.node = n;
+  mesh.userData.baseScale = 1;
+  mesh.scale.setScalar(1);
+  scene.add(mesh);
+  nodeMeshes.set(n.id, mesh);
+  const ringMaterial = new THREE.MeshBasicMaterial({
+   color: n.risk >= 70 ? 0xff7188 : n.risk >= 45 ? 0xf8c875 : 0x67e6c3,
+   transparent: true,
+   opacity: 0.72
+  });
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(1.38, 0.045, 8, 40), ringMaterial);
+  ring.position.copy(mesh.position);
+  ring.rotation.set(Math.PI * 0.42, Math.PI * 0.18, 0);
+  ring.userData.nodeId = n.id;
+  scene.add(ring);
+  nodeRings.set(n.id, ring);
+ });
+ buildLabels();
+}
+
+function buildLabels() {
+ labelSprites.forEach((s) => {
+  s.material.map.dispose();
+  s.material.dispose();
+  scene.remove(s);
+ });
+ labelSprites.clear();
+ if (!state.showLabels) return;
+ nodes.forEach((n) => {
+  const pos = layout.get(n.id);
+  if (!pos) return;
+  const sprite = makeTextSprite(n.id);
+  sprite.position.set(pos.x, pos.y, pos.z + 1.8);
+  sprite.userData.nodeId = n.id;
+  labelSprites.set(n.id, sprite);
+  scene.add(sprite);
+ });
+}
+
+function buildConnectionParticles() {
+ connectionParticles.forEach((g) => scene.remove(g));
+ connectionParticles.clear();
+ if (!state.showParticles) return;
+ edges.forEach(([a, b]) => {
+  const pa = layout.get(a);
+  const pb = layout.get(b);
+  if (!pa || !pb) return;
+  const geom = new THREE.BufferGeometry();
+  const count = 8;
+  const verts = new Float32Array(count * 3);
+  for (let i = 0; i < count; i++) {
+   verts[i * 3] = pa.x + (pb.x - pa.x) * (i / count);
+   verts[i * 3 + 1] = pa.y + (pb.y - pa.y) * (i / count);
+   verts[i * 3 + 2] = pa.z + (pb.z - pa.z) * (i / count);
+  }
+  geom.setAttribute('position', new THREE.BufferAttribute(verts, 3));
+  const mat = new THREE.PointsMaterial({ color: 0x8ff5d8, size: 0.12, transparent: true, opacity: 0.9 });
+  const ps = new THREE.Points(geom, mat);
+  ps.userData = { edgeKey: a + "->" + b, offset: Math.random() * Math.PI * 2 };
+  connectionParticles.set(a + "->" + b, ps);
+  scene.add(ps);
+ });
+}
+
+function initThree() {
+ const container = document.getElementById('threejs-container');
+ scene = new THREE.Scene();
+ scene.background = new THREE.Color(0x070c14);
+ const w = container.clientWidth;
+ const h = container.clientHeight;
+ camera = new THREE.PerspectiveCamera(42, w / h, 0.1, 2000);
+ camera.position.set(0, 0, 30);
+ renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+ renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+ renderer.setSize(w, h);
+ renderer.domElement.setAttribute("aria-label", "Interactive 3D transaction relationship graph");
+ container.appendChild(renderer.domElement);
+ controls = new OrbitControls(camera, renderer.domElement);
+ controls.enableDamping = true;
+ controls.dampingFactor = 0.06;
+ controls.minDistance = 8;
+ controls.maxDistance = 90;
+ controls.enablePan = true;
+ controls.target.set(0, 0, 0);
+ raycaster = new THREE.Raycaster();
+ pointer = new THREE.Vector2();
+ const ambientLight = new THREE.AmbientLight(0x7890b5, 1.4);
+ scene.add(ambientLight);
+ const hemisphereLight = new THREE.HemisphereLight(0xdce9ff, 0x07121d, 1.15);
+ scene.add(hemisphereLight);
+ const dirLight = new THREE.DirectionalLight(0x9ec5ff, 0.7);
+ dirLight.position.set(10, 20, 20);
+ scene.add(dirLight);
+ const pointLight = new THREE.PointLight(0x67e6c3, 1, 80);
+ pointLight.position.set(-10, 10, 10);
+ scene.add(pointLight);
+ scene.add(particleGroup);
+ state.threeInitialized = true;
+ document.getElementById("webgl-status").innerHTML = '<span class="legend-swatch" style="background:var(--teal)"></span>WebGL ready';
+}
+
+function updateHighlight() {
+ if (!state.threeInitialized) return;
+ const sel = state.selected;
+ const near = sel ? getNeighbors(sel) : new Set();
+ const evidence = sel && state.evidenceFocus ? evidenceFor(nodeMap[sel]).find(item => item.id === state.evidenceFocus) : null;
+ const evidenceNodes = evidence ? evidence.nodes : new Set();
+ const pathNodes = new Set(state.tracePath.slice(0, Math.floor(state.traceProgress) + 1));
+ const pathEdges = new Set(state.tracePath.slice(0, Math.floor(state.traceProgress)).map((id, index) => `${id}->${state.tracePath[index + 1]}`));
+ nodeMeshes.forEach((mesh, id) => {
+  if (!mesh.visible) return;
+  const n = nodeMap[id];
+  if (evidence && !evidenceNodes.has(id)) {
+   mesh.material.dispose();
+   mesh.material = nodeMaterialFor(n, 0.22);
+   mesh.scale.setScalar(0.8);
+  } else if (state.traceActive && pathNodes.has(id)) {
+   mesh.material = pathNodeMaterial.clone();
+   mesh.scale.setScalar(id === sel ? 1.5 : 1.2);
+  } else if (id === sel) {
+   mesh.material = selectedMaterial.clone();
+   mesh.scale.setScalar(1.4);
+  } else if (id === state.hoveredNode) {
+   mesh.material.dispose();
+   mesh.material = nodeMaterialFor(n);
+   mesh.material.emissiveIntensity = 1.65;
+   mesh.scale.setScalar(1.24);
+  } else if (near.has(id)) {
+   mesh.material = highlightedMaterial.clone();
+   mesh.scale.setScalar(1.1);
+  } else {
+   const cat = riskCategory(n.risk);
+   mesh.material.dispose();
+   mesh.material = nodeMaterialFor(n);
+   mesh.scale.setScalar(1);
+  }
+ });
+ nodeRings.forEach((ring, id) => {
+  ring.visible = nodeMeshes.get(id)?.visible || false;
+  ring.scale.setScalar(id === sel ? 1.18 : id === state.hoveredNode ? 1.12 : 1);
+  ring.material.opacity = id === sel ? 0.95 : id === state.hoveredNode ? 1 : 0.72;
+ });
+ edgeLines.forEach((line) => {
+  if (!line.visible) return;
+  const edgeKey = `${line.userData.source}->${line.userData.target}`;
+  if (state.traceActive && pathEdges.has(edgeKey)) {
+   line.material = pathEdgeMat.clone();
+   return;
+  }
+  if (evidence && !evidence.edges.some(([a, b]) => a === line.userData.source && b === line.userData.target)) {
+   line.material = edgeMat.clone();
+   line.material.opacity = 0.12;
+   return;
+  }
+  const isSel = line.userData.source === sel || line.userData.target === sel;
+  const isHovered = line.userData.source === state.hoveredNode || line.userData.target === state.hoveredNode;
+  const isNeighbor = near.has(line.userData.source) && near.has(line.userData.target);
+  if (isHovered) {
+   line.material = highlightEdgeMat.clone();
+   line.material.opacity = 1;
+  } else if (isSel) {
+   line.material = (line.userData.target === sel ? outgoingEdgeMat : incomingEdgeMat).clone();
+  } else if (isNeighbor) {
+   line.material = incomingEdgeMat.clone();
+   line.material.opacity = 0.4;
+  } else {
+   line.material = edgeMat.clone();
+  }
+ });
+ edgeArrows.forEach((arrow) => {
+  if (!arrow.visible) return;
+  const edgeKey = `${arrow.userData.source}->${arrow.userData.target}`;
+  if (state.traceActive && pathEdges.has(edgeKey)) {
+   arrow.material = pathEdgeMat.clone();
+   return;
+  }
+  if (evidence && !evidence.edges.some(([a, b]) => a === arrow.userData.source && b === arrow.userData.target)) {
+   arrow.material = edgeMat.clone();
+   arrow.material.opacity = 0.12;
+   return;
+  }
+  const isSelected = arrow.userData.source === sel || arrow.userData.target === sel;
+  const isHovered = arrow.userData.source === state.hoveredNode || arrow.userData.target === state.hoveredNode;
+  arrow.material = (isHovered ? highlightEdgeMat : isSelected ? outgoingEdgeMat : edgeMat).clone();
+ });
+}
+
+function applyFilterVisibility() {
+ if (!state.threeInitialized) return;
+ const q = document.getElementById("nodeSearch").value.trim().toUpperCase();
+ const f = document.getElementById("riskFilter").value;
+ let visibleCount = 0, visibleEdges = 0;
+ nodeMeshes.forEach((mesh, id) => {
+  const n = nodeMap[id];
+  let visible = true;
+  if (q && !id.includes(q)) visible = false;
+  if (f !== "all") {
+   if (f === "high" && n.risk < 70) visible = false;
+   if (f === "medium" && (n.risk < 45 || n.risk >= 70)) visible = false;
+   if (f === "low" && n.risk >= 45) visible = false;
+  }
+  if (state.graphDepth !== "all" && state.selected && !getNeighborsAtDepth(state.selected, Number(state.graphDepth)).has(id)) visible = false;
+  if (state.neighborhoodOnly && state.selected && id !== state.selected && !getNeighbors(state.selected).has(id)) visible = false;
+  mesh.visible = visible;
+  if (visible) visibleCount++;
+ });
+ edgeLines.forEach((line) => {
+  const a = line.userData.source, b = line.userData.target;
+  const aVis = nodeMeshes.get(a)?.visible || false;
+  const bVis = nodeMeshes.get(b)?.visible || false;
+  line.visible = state.showConnections && aVis && bVis;
+  if (line.visible) visibleEdges++;
+ });
+ edgeArrows.forEach((arrow) => {
+  const a = arrow.userData.source, b = arrow.userData.target;
+  arrow.visible = state.showConnections && nodeMeshes.get(a)?.visible && nodeMeshes.get(b)?.visible;
+ });
+ connectionParticles.forEach((particle) => {
+  const [a, b] = particle.userData.edgeKey.split("->");
+  particle.visible = state.showParticles && nodeMeshes.get(a)?.visible && nodeMeshes.get(b)?.visible;
+ });
+ labelSprites.forEach((s) => {
+  s.visible = state.showLabels && nodeMeshes.get(s.userData.nodeId)?.visible || false;
+ });
+ const statusEl = document.getElementById("graphCount");
+ statusEl.textContent = visibleCount > 0 ? `${visibleCount} nodes · ${visibleEdges} edges` : "No matching transactions found";
+ statusEl.style.color = visibleCount > 0 ? "var(--muted)" : "var(--amber)";
+ updateHighlight();
+}
+
+function onPointerMove(event) {
+ if (!state.threeInitialized) return;
+ const container = document.getElementById('threejs-container');
+ const rect = container.getBoundingClientRect();
+ pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+ pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+ updateHoveredNode();
+}
+function updateHoveredNode() {
+ if (!state.threeInitialized) return;
+ raycaster.setFromCamera(pointer, camera);
+ const meshes = Array.from(nodeMeshes.values()).filter(m => m.visible);
+ const intersects = raycaster.intersectObjects(meshes);
+ const next = intersects.length ? intersects[0].object.userData.nodeId : null;
+ if (next === state.hoveredNode) return;
+ state.hoveredNode = next;
+ const container = document.getElementById("threejs-container");
+ container.style.cursor = next ? "pointer" : "grab";
+ updateHighlight();
+}
+function onPointerDown(event) {
+ if (!state.threeInitialized) return;
+ const container = document.getElementById('threejs-container');
+ const rect = container.getBoundingClientRect();
+ pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+ pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+ raycaster.setFromCamera(pointer, camera);
+ const meshes = Array.from(nodeMeshes.values()).filter(m => m.visible);
+ const intersects = raycaster.intersectObjects(meshes);
+ if (intersects.length > 0) {
+  focusOnNode(intersects[0].object.userData.nodeId);
+ } else {
+  raycaster.params.Line.threshold = 0.18;
+  const edgeHits = raycaster.intersectObjects(Array.from(edgeLines.values()).filter(line => line.visible));
+  if (edgeHits.length) {
+   inspectEdge(edgeHits[0].object.userData.source, edgeHits[0].object.userData.target);
+  } else {
+   state.hoveredNode = null;
+   clearSelection();
+  }
+ }
+}
+
+function inspectEdge(sourceId, targetId) {
+ const source = nodeMap[sourceId];
+ const target = nodeMap[targetId];
+ state.hoveredEdge = `${sourceId}->${targetId}`;
+ const inspector = document.getElementById("edgeInspector");
+ if (!inspector) return;
+ inspector.classList.add("show");
+ inspector.innerHTML = `<b>Directed relationship</b><br>${sourceId} → ${targetId}<br><span style="color:var(--text)">${source.amount} → ${target.amount}</span> · timestep ${source.step} → ${target.step}<br><span style="color:var(--teal)">Click a node to return to transaction inspection.</span>`;
+ toast(`Relationship inspected: ${sourceId} → ${targetId}`);
+}
+
+let tooltipEl = null;
+function showTooltip(nodeId, x, y) {
+ if (!tooltipEl) {
+  tooltipEl = document.createElement('div');
+  tooltipEl.style.cssText = 'position:fixed;top:0;left:0;background:#15253a;border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:10px;color:var(--text);pointer-events:none;z-index:9999;opacity:0;transition:opacity .2s';
+  document.body.appendChild(tooltipEl);
+ }
+ const n = nodeMap[nodeId];
+ const { incoming, outgoing } = getEdgeEndpoints(nodeId);
+ tooltipEl.innerHTML = `<strong>${n.id}</strong><br>Risk ${n.risk}/100 · ${n.amount}<br>${n.region} · ${n.accountType}<br>${incoming.length} in · ${outgoing.length} out · ${patternFor(n)}`;
+ tooltipEl.style.left = (x + 12) + 'px';
+ tooltipEl.style.top = (y + 12) + 'px';
+ tooltipEl.style.opacity = 1;
+}
+function hideTooltip() {
+ if (tooltipEl) tooltipEl.style.opacity = 0;
+}
+document.addEventListener('mousemove', (e) => {
+ const container = document.getElementById('threejs-container');
+ const rect = container.getBoundingClientRect();
+ if (e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom) {
+  if (!state.threeInitialized) return;
+  pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+  pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+  raycaster.setFromCamera(pointer, camera);
+  const meshes = Array.from(nodeMeshes.values()).filter(m => m.visible);
+  const intersects = raycaster.intersectObjects(meshes);
+  if (intersects.length > 0) {
+   const next = intersects[0].object.userData.nodeId;
+   if (next !== state.hoveredNode) {
+    state.hoveredNode = next;
+    updateHighlight();
+   }
+   showTooltip(intersects[0].object.userData.nodeId, e.clientX, e.clientY);
+   container.style.cursor = 'pointer';
+  } else {
+    if (state.hoveredNode) {
+     state.hoveredNode = null;
+     updateHighlight();
+    }
+   hideTooltip();
+   container.style.cursor = 'grab';
+  }
+ } else {
+  hideTooltip();
+ }
+});
+
+function select(id) {
+ const n = nodeMap[id];
+ if (!n) {
+  toast("No matching transaction found.");
+  return;
+ }
+ state.selected = id;
+ state.evidenceFocus = null;
+ state.traceActive = false;
+ state.tracePath = [];
+ state.traceProgress = 0;
+ state.timeline = [];
+ document.getElementById("edgeInspector").classList.remove("show");
+ document.getElementById("tracePathBtn").textContent = "Trace suspicious path";
+ updateInspector(n);
+ renderGraphDossier();
+ applyFilterVisibility();
+ updateExplanations(n);
+ addTimelineEvent("Transaction selected", `${id} is ready for analyst review.`);
+ if (!state.caseData[id]) state.caseData[id] = { status: 'unreviewed', notes: '', history: [] };
+}
+
+function clearSelection() {
+ state.selected = null;
+ state.evidenceFocus = null;
+ state.traceActive = false;
+ state.tracePath = [];
+ state.traceProgress = 0;
+ state.timeline = [];
+ document.getElementById("tracePathBtn").textContent = "Trace suspicious path";
+ state.neighborhoodOnly = false;
+ updateInspector(null);
+ renderGraphDossier();
+ applyFilterVisibility();
+ updateExplanations(null);
+ renderTimeline();
+}
+
+function updateInspector(n) {
+ const elements = ["selectedId","riskNumber","riskBar","riskClass","riskBadge",
+  "amountField","timeStepField","degreeField","incomingField","outgoingField",
+  "neighborCountField","reviewStatus","categoryField","statusSelect","notesField"];
+ if (!n) {
+  document.getElementById("selectedId").textContent = "No transaction selected";
+  document.getElementById("riskNumber").innerHTML = "--<small> / 100</small>";
+  document.getElementById("riskBar").style.width = "0%";
+  document.getElementById("riskClass").textContent = "Not selected";
+  document.getElementById("riskStory").innerHTML = "<strong>Risk story</strong><span>Select a transaction to generate a concise investigation summary.</span>";
+  document.getElementById("riskBadge").textContent = "— · DEMO";
+  document.getElementById("riskBadge").style.color = "";
+  document.getElementById("riskBadge").style.borderColor = "";
+  document.getElementById("statusSelect").value = "unreviewed";
+  document.getElementById("notesField").value = "";
+  document.getElementById("priorityField").value = "standard";
+  document.getElementById("assigneeField").value = "";
+  document.querySelectorAll("[data-check]").forEach(input => input.checked = false);
+  document.getElementById("caseHistoryPanel").textContent = "No case history for this transaction.";
+  document.getElementById("evidenceDetail").classList.remove("show");
+  elements.slice(5).forEach(id => {
+   const el = document.getElementById(id);
+   if (el && id !== "statusSelect" && id !== "notesField") el.textContent = "Not available";
+  });
+  return;
+ }
+ const { incoming: incMap, outgoing: outMap } = countEdgeDegrees();
+ const deg = (incMap.get(n.id) || 0) + (outMap.get(n.id) || 0);
+ const neighbors = getNeighbors(n.id);
+ const cat = riskCategory(n.risk);
+ document.getElementById("selectedId").textContent = n.id + (n.sender_account ? " · uploaded transaction" : " · synthetic transaction");
+ document.getElementById("riskNumber").innerHTML = n.risk + '<small> / 100</small>';
+ document.getElementById("riskBar").style.width = n.risk + "%";
+ document.getElementById("riskBar").style.background =
+  n.risk >= 70 ? "linear-gradient(90deg,var(--amber),var(--red))" : n.risk >= 45 ? "var(--amber)" : "var(--teal)";
+ document.getElementById("riskClass").textContent =
+  n.risk >= 70 ? "Priority review" : n.risk >= 45 ? "Inspect context" : "Lower sample risk";
+ document.getElementById("riskStory").innerHTML = `<strong>Risk story</strong><span>${riskStoryFor(n)}</span><span class="pattern-chip">${patternFor(n)}</span>`;
+ const badge = document.getElementById("riskBadge");
+ const band = n.risk >= 70 ? "ELEVATED" : n.risk >= 45 ? "REVIEW" : "LOWER";
+ badge.textContent = band + " · RULE-BASED";
+ const color = n.risk >= 70 ? "var(--red)" : n.risk >= 45 ? "var(--amber)" : "var(--teal)";
+ badge.style.color = color;
+ badge.style.borderColor = color;
+ document.getElementById("amountField").textContent = n.amount;
+ document.getElementById("timeStepField").textContent = "Timestep " + n.step;
+ document.getElementById("degreeField").textContent = deg + " connections";
+ document.getElementById("incomingField").textContent = (incMap.get(n.id) || 0) + " incoming";
+ document.getElementById("outgoingField").textContent = (outMap.get(n.id) || 0) + " outgoing";
+ document.getElementById("neighborCountField").textContent = neighbors.size + " neighbors";
+ document.getElementById("categoryField").textContent =
+  cat === "high" ? "High-priority candidate" : cat === "mid" ? "Suspicious-looking" : "Normal transaction";
+ document.getElementById("accountTypeField").textContent = n.accountType;
+ document.getElementById("regionField").textContent = `${n.region} · ${n.currency}`;
+ document.getElementById("patternField").textContent = n.pattern;
+ const cd = state.caseData[n.id] || { status: 'unreviewed', notes: '', history: [], priority: 'standard', assignee: '', checklist: {} };
+ document.getElementById("reviewStatus").textContent = cd.status.charAt(0).toUpperCase() + cd.status.slice(1).replace('_', ' ');
+ document.getElementById("statusSelect").value = cd.status;
+ document.getElementById("notesField").value = cd.notes;
+ document.getElementById("priorityField").value = cd.priority || "standard";
+ document.getElementById("assigneeField").value = cd.assignee || "";
+ document.querySelectorAll("[data-check]").forEach(input => input.checked = Boolean((cd.checklist || {})[input.dataset.check]));
+ const history = cd.history || [];
+ document.getElementById("caseHistoryPanel").innerHTML = history.length
+  ? `<b>Case history</b><br>${history.slice(0, 4).map(item => `${item.time.slice(0, 16).replace("T", " ")} · ${item.type}: ${String(item.value).replace(/</g, "&lt;")}`).join("<br>")}`
+  : "No case history for this transaction.";
+ renderGraphDossier();
+}
+
+function updateExplanations(n) {
+ const list = document.getElementById("evidenceList");
+ const subtitle = document.getElementById("evidenceSubtitle");
+ if (!n) {
+  subtitle.textContent = "Evidence linked to the selected transaction";
+  list.innerHTML = '<div class="empty-state">Select a transaction to generate linked evidence.</div>';
+  return;
+ }
+ subtitle.textContent = `${n.id} · rule-based evidence signals`;
+ list.innerHTML = evidenceFor(n).map(item => `
+  <button class="evidence-card${state.evidenceFocus === item.id ? " active" : ""}" data-evidence="${item.id}">
+   <span class="evicon">${item.icon}</span>
+   <span><b>${item.title}</b><p>${item.text}</p><div class="confidence"><span style="width:${item.confidence}%"></span></div><small style="color:var(--muted)">${item.confidence}% confidence · click to focus</small></span>
+   <span class="score">${item.score}</span>
+  </button>`).join("");
+ list.querySelectorAll("[data-evidence]").forEach(card => card.addEventListener("click", () => focusEvidence(card.dataset.evidence)));
+}
+
+function focusEvidence(id) {
+ const n = state.selected && nodeMap[state.selected];
+ const item = n && evidenceFor(n).find(entry => entry.id === id);
+ if (!item) return;
+ state.evidenceFocus = id;
+ applyFilterVisibility();
+ updateHighlight();
+ updateExplanations(n);
+ renderMiniMap();
+ const detail = document.getElementById("evidenceDetail");
+ detail.classList.add("show");
+ detail.innerHTML = `<b>${item.title}</b><br>${item.text}<br><span style="color:var(--teal)">Confidence ${item.confidence}%</span> · ${item.nodes.size} nodes · ${item.edges.length} edges highlighted`;
+ const positions = [...item.nodes].map(nodeId => layout.get(nodeId)).filter(Boolean).map(pos => new THREE.Vector3(pos.x, pos.y, pos.z));
+ if (positions.length) {
+  const center = positions.reduce((sum, point) => sum.add(point), new THREE.Vector3()).divideScalar(positions.length);
+  animateTarget(center, 700);
+ }
+ addTimelineEvent("Evidence focused", item.title);
+ toast(`Evidence focus: ${item.title}.`);
+}
+
+function handleKeyboardShortcuts(event) {
+ if (event.target.matches("input, textarea, select")) return;
+ if (event.key === "Escape") clearSelection();
+ if (event.key.toLowerCase() === "f") fitNetworkView(true);
+ if (event.key === "+" || event.key === "=") zoomNetwork(0.78);
+ if (event.key === "-" || event.key === "_") zoomNetwork(1.28);
+ if (event.key.toLowerCase() === "e" && state.selected) document.getElementById("explainRiskBtn").click();
+}
+
+function clearEvidenceFocus() {
+ state.evidenceFocus = null;
+ applyFilterVisibility();
+ updateExplanations(state.selected ? nodeMap[state.selected] : null);
+ document.getElementById("evidenceDetail").classList.remove("show");
+}
+
+function focusOnNode(id) {
+ const n = nodeMap[id];
+ if (!n || !nodeMeshes.has(id)) {
+  toast("No matching transaction found.");
+  return;
+ }
+ const mesh = nodeMeshes.get(id);
+ if (mesh && state.threeInitialized) {
+  const worldPos = mesh.getWorldPosition(new THREE.Vector3());
+  const direction = new THREE.Vector3().subVectors(camera.position, controls.target);
+  if (direction.lengthSq() === 0) direction.set(0, 0, 1);
+  direction.normalize();
+  const targetPos = worldPos.clone().add(direction.multiplyScalar(13));
+  animateCameraPosition(targetPos, 1000);
+  animateTarget(worldPos, 1000);
+ }
+ select(id);
+}
+function animateCameraPosition(targetPos, duration) {
+ const start = camera.position.clone();
+ const startTime = performance.now();
+ function step(time) {
+  const elapsed = time - startTime;
+  const t = Math.min(elapsed / duration, 1);
+  const ease = 1 - Math.pow(1 - t, 3);
+  camera.position.lerpVectors(start, targetPos, ease);
+  if (t < 1) requestAnimationFrame(step);
+ }
+ requestAnimationFrame(step);
+}
+function animateTarget(target, duration) {
+ const start = controls.target.clone();
+ const startTime = performance.now();
+ function step(time) {
+  const elapsed = time - startTime;
+  const t = Math.min(elapsed / duration, 1);
+  const ease = 1 - Math.pow(1 - t, 3);
+  controls.target.lerpVectors(start, target, ease);
+  controls.update();
+  if (t < 1) requestAnimationFrame(step);
+ }
+ requestAnimationFrame(step);
+}
+
+function updateNodePositions(){
+ nodeMeshes.forEach((mesh, id) => {
+  const pos = layout.get(id);
+  if (pos) mesh.position.set(pos.x, pos.y, pos.z);
+ });
+ nodeRings.forEach((ring, id) => {
+  const pos = layout.get(id);
+  if (pos) ring.position.set(pos.x, pos.y, pos.z);
+ });
+ labelSprites.forEach((sprite, id) => {
+  const pos = layout.get(id);
+  if (pos) sprite.position.set(pos.x, pos.y, pos.z + 1.8);
+ });
+}
+
+function render() {
+ if (state.threeInitialized) {
+  const delta = clock.getDelta();
+  nodeMeshes.forEach((mesh, id) => {
+   const speed = nodeMap[id].risk >= 70 ? 0.72 : nodeMap[id].risk >= 45 ? 0.52 : 0.34;
+   mesh.rotation.y += delta * speed;
+   mesh.rotation.x += delta * speed * 0.32;
+   const pulse = id === state.selected
+    ? 1.4 + Math.sin(clock.elapsedTime * 4.2) * 0.06
+    : id === state.hoveredNode
+     ? 1.22 + Math.sin(clock.elapsedTime * 7) * 0.05
+      : getNeighbors(state.selected || "").has(id) ? 1.08 : 1;
+   mesh.scale.setScalar(pulse);
+  });
+  nodeRings.forEach((ring, id) => {
+   const speed = nodeMap[id].risk >= 70 ? 0.95 : 0.62;
+   ring.rotation.z += delta * speed;
+   ring.rotation.x += delta * speed * 0.28;
+   if (id === state.selected || id === state.hoveredNode) {
+    ring.scale.setScalar((id === state.selected ? 1.18 : 1.1) + Math.sin(clock.elapsedTime * 4) * 0.06);
+   }
+  });
+  if (state.traceActive) {
+   state.traceProgress += delta * 0.9;
+   if (state.traceProgress >= state.tracePath.length - 1) {
+    state.traceProgress = state.tracePath.length - 1;
+    state.traceActive = false;
+    document.getElementById("tracePathBtn").textContent = "Replay suspicious path";
+    addTimelineEvent("Suspicious path trace complete", `${state.tracePath.length} transactions reviewed from ${state.tracePath[0]}.`);
+    toast("Suspicious path trace complete.");
+   }
+   updateHighlight();
+  }
+  particleGroup.rotation.y += delta * 0.01;
+  connectionParticles.forEach((ps, key) => {
+   const verts = ps.geometry.attributes.position.array;
+   const [a, b] = key.split("->");
+   const pa = layout.get(a);
+   const pb = layout.get(b);
+   if (!pa || !pb) return;
+   const animOffset = (Date.now() * 0.0005) % 1;
+   for (let i = 0; i < 8; i++) {
+    const ratio = (i + animOffset) / 8;
+    const clampedRatio = ratio > 1 ? ratio - 1 : ratio;
+    verts[i * 3] = pa.x + (pb.x - pa.x) * clampedRatio;
+    verts[i * 3 + 1] = pa.y + (pb.y - pa.y) * clampedRatio;
+    verts[i * 3 + 2] = pa.z + (pb.z - pa.z) * clampedRatio;
+   }
+   ps.geometry.attributes.position.needsUpdate = true;
+  });
+  controls.update();
+  renderer.render(scene, camera);
+ }
+ requestAnimationFrame(render);
+}
+
+function onResize() {
+ if (!renderer) return;
+ const container = document.getElementById('threejs-container');
+ const width = container.clientWidth;
+ const height = container.clientHeight;
+ if (!width || !height) return;
+ camera.aspect = width / height;
+ camera.updateProjectionMatrix();
+ renderer.setSize(width, height);
+}
+window.addEventListener('resize', onResize);
+
+function updateToggleButton(id, enabled, label) {
+ const button = document.getElementById(id);
+ button.classList.toggle("active-toggle", enabled);
+ button.setAttribute("aria-pressed", String(enabled));
+ button.textContent = `${label}: ${enabled ? "On" : "Off"}`;
+}
+
+function getVisibleNodePositions() {
+ return Array.from(nodeMeshes.values())
+  .filter(mesh => mesh.visible)
+  .map(mesh => mesh.getWorldPosition(new THREE.Vector3()));
+}
+
+function fitNetworkView(showToast = false) {
+ if (!state.threeInitialized) return false;
+ const positions = getVisibleNodePositions();
+ if (positions.length === 0) {
+  if (showToast) toast("No visible nodes to fit.");
+  return false;
+ }
+ const center = positions.reduce((sum, point) => sum.add(point), new THREE.Vector3())
+  .divideScalar(positions.length);
+ const bounds = new THREE.Box3().setFromPoints(positions);
+ const size = bounds.getSize(new THREE.Vector3());
+ const verticalFov = THREE.MathUtils.degToRad(camera.fov);
+ const horizontalFov = 2 * Math.atan(Math.tan(verticalFov / 2) * camera.aspect);
+ const verticalDistance = (size.y / 2 + 2.5) / Math.tan(verticalFov / 2);
+ const horizontalDistance = (size.x / 2 + 2.5) / Math.tan(horizontalFov / 2);
+ const fitDistance = Math.max(12, verticalDistance, horizontalDistance) * 1.08;
+ const direction = new THREE.Vector3().subVectors(camera.position, controls.target);
+ if (direction.lengthSq() === 0) direction.set(0, 0, 1);
+ direction.normalize();
+ camera.position.copy(center).add(direction.multiplyScalar(Math.min(fitDistance, controls.maxDistance - 1)));
+ controls.target.copy(center);
+ controls.update();
+ if (showToast) toast("Network fitted to visible nodes.");
+ return true;
+}
+
+function zoomNetwork(factor) {
+ if (!state.threeInitialized) return;
+ const direction = new THREE.Vector3().subVectors(camera.position, controls.target);
+ const distance = THREE.MathUtils.clamp(
+  direction.length() * factor,
+  controls.minDistance,
+  controls.maxDistance
+ );
+ if (direction.lengthSq() === 0) direction.set(0, 0, 1);
+ direction.normalize();
+ camera.position.copy(controls.target).add(direction.multiplyScalar(distance));
+ controls.update();
+}
+
+function replaceGraphData(payload) {
+ const oldSelection = state.selected;
+ nodes = payload.nodes.map((item, index) => ({
+  ...item,
+  x: 45 + (index * 137) % 670,
+  y: 45 + (index * 83) % 350,
+  amount: item.amount || `₹${Number(item.amount_inr).toLocaleString("en-IN")}`,
+  currency: "INR",
+  accountType: "Account",
+  region: "Uploaded",
+  pattern: item.risk_factors.join(", "),
+  cluster: item.risk >= 70 ? "Rule-based elevated" : item.risk >= 45 ? "Rule-based review" : "Rule-based baseline"
+ }));
+ edges = payload.edges.map(edge => [edge.source, edge.target]);
+ nodeMap = Object.fromEntries(nodes.map(node => [node.id, node]));
+ layout = generateLayout();
+ state.selected = null;
+ state.caseData = {};
+ if (state.threeInitialized) {
+  buildEdges();
+  buildNodeMeshes();
+  buildConnectionParticles();
+  if (state.showLabels) buildLabels();
+  renderMiniMap();
+  applyFilterVisibility();
+  fitNetworkView();
+ }
+ document.getElementById("datasetStatus").textContent = payload.source === "uploaded" ? `● Uploaded: ${payload.filename}` : "● Built-in demo dataset";
+ document.getElementById("datasetSourceHint").textContent = payload.source === "uploaded" ? "Uploaded dataset" : "Built-in demo graph";
+ document.getElementById("transactionTableSubtitle").textContent = payload.source === "uploaded"
+  ? `${payload.filename} · ${payload.summary.transactions} uploaded records · select a row to inspect the graph node`
+  : "Built-in demo records · select a row to inspect the graph node";
+ renderTransactionTable(payload.records);
+ updateMetrics();
+ const firstId = nodes[0] && nodes[0].id;
+ if (firstId) select(oldSelection && nodeMap[oldSelection] ? oldSelection : firstId);
+ else clearSelection();
+}
+
+function escapeHtml(value) {
+ return String(value ?? "").replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
+}
+
+function renderTransactionTable(records) {
+ const body = document.getElementById("transactionRows");
+ if (!body) return;
+ if (!records.length) {
+  body.innerHTML = '<tr><td colspan="7" class="empty-state">No transactions in the active dataset.</td></tr>';
+  return;
+ }
+ body.innerHTML = records.map(record => {
+  const band = record.risk >= 70 ? "high" : record.risk >= 45 ? "mid" : "low";
+  return `<tr data-transaction-row="${escapeHtml(record.transaction_id)}" style="cursor:pointer">
+   <td><span class="caseid">${escapeHtml(record.transaction_id)}</span></td>
+   <td>${escapeHtml(record.timestamp)}</td><td>${escapeHtml(record.sender_account)}</td>
+   <td>${escapeHtml(record.receiver_account)}</td><td>₹${Number(record.amount_inr).toLocaleString("en-IN")}</td>
+   <td><span class="badge-${band}">${record.risk}/100</span></td>
+   <td>${escapeHtml(record.supplied_label || "Not supplied")}</td></tr>`;
+ }).join("");
+ body.querySelectorAll("[data-transaction-row]").forEach(row => row.addEventListener("click", () => {
+  const id = row.dataset.transactionRow;
+  if (nodeMap[id]) focusOnNode(id);
+ }));
+}
+
+async function loadCurrentDataset() {
+ const response = await fetch(`${window.TRACE_X_API_BASE || ""}/api/datasets/current`, { credentials: "include" });
+ if (!response.ok) throw new Error("Unable to load the current dataset.");
+ replaceGraphData(await response.json());
+}
+
+function setupDatasetUpload() {
+ const uploadBtn = document.getElementById("uploadDatasetBtn");
+ const demoBtn = document.getElementById("demoDatasetBtn");
+ const fileInput = document.getElementById("datasetFileInput");
+ uploadBtn.addEventListener("click", () => fileInput.click());
+ fileInput.addEventListener("change", async () => {
+  const file = fileInput.files[0];
+  fileInput.value = "";
+  if (!file) return;
+  if (!file.name.toLowerCase().endsWith(".csv")) {
+   toast("Unsupported format. Choose a CSV file.");
+   return;
+  }
+  uploadBtn.disabled = true;
+  uploadBtn.textContent = "Uploading…";
+  try {
+   const form = new FormData();
+   form.append("file", file);
+   const response = await fetch(`${window.TRACE_X_API_BASE || ""}/api/datasets`, { method: "POST", body: form, credentials: "include" });
+   const result = await response.json();
+   if (!response.ok) throw new Error(result.error || "Upload failed.");
+   replaceGraphData(result);
+   addTimelineEvent("Dataset uploaded", `${file.name} loaded with ${result.summary.transactions} transactions and ${result.summary.flagged} rule-based flags.`);
+   toast(`Uploaded ${file.name}: graph updated successfully.`);
+  } catch (error) {
+   toast(error.message);
+  } finally {
+   uploadBtn.disabled = false;
+   uploadBtn.textContent = "⬆ Upload dataset";
+  }
+ });
+ demoBtn.addEventListener("click", async () => {
+  demoBtn.disabled = true;
+  try {
+   const response = await fetch(`${window.TRACE_X_API_BASE || ""}/api/datasets/demo`, { method: "POST", credentials: "include" });
+   if (!response.ok) throw new Error("Unable to restore the demo dataset.");
+   replaceGraphData(await response.json());
+   toast("Built-in demo dataset restored.");
+  } catch (error) {
+   toast(error.message);
+  } finally {
+   demoBtn.disabled = false;
+  }
+ });
+}
+
+function setupToolbar() {
+ const scrollToPanel = (panelId) => {
+  const panel = document.getElementById(panelId);
+  if (panel) panel.scrollIntoView({ behavior: "smooth", block: "start" });
+ };
+ document.getElementById("viewOverviewBtn").addEventListener("click", () => {
+  document.getElementById("viewOverviewBtn").classList.add("active-toggle");
+  document.getElementById("viewEvidenceBtn").classList.remove("active-toggle");
+  document.getElementById("viewTimelineBtn").classList.remove("active-toggle");
+  scrollToPanel("graphPanel");
+ });
+ document.getElementById("viewEvidenceBtn").addEventListener("click", () => {
+  if (!state.selected) {
+   toast("Select a transaction to view evidence.");
+   return;
+  }
+  document.getElementById("viewOverviewBtn").classList.remove("active-toggle");
+  document.getElementById("viewEvidenceBtn").classList.add("active-toggle");
+  document.getElementById("viewTimelineBtn").classList.remove("active-toggle");
+  scrollToPanel("evidencePanel");
+  document.getElementById("explainRiskBtn").focus();
+ });
+ document.getElementById("viewTimelineBtn").addEventListener("click", () => {
+  document.getElementById("viewOverviewBtn").classList.remove("active-toggle");
+  document.getElementById("viewEvidenceBtn").classList.remove("active-toggle");
+  document.getElementById("viewTimelineBtn").classList.add("active-toggle");
+  scrollToPanel("timelinePanel");
+ });
+ document.getElementById("nodeSearch").addEventListener("input", () => {
+  applyFilterVisibility();
+  const selectedMesh = state.selected && nodeMeshes.get(state.selected);
+  if (selectedMesh && !selectedMesh.visible) {
+   clearSelection();
+  }
+ });
+ document.getElementById("nodeSearch").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+   const q = e.target.value.trim().toUpperCase();
+   if (nodeMap[q]) {
+    focusOnNode(q);
+   } else if (q) {
+    toast("No matching transaction found.");
+   }
+  }
+ });
+ document.getElementById("riskFilter").addEventListener("change", () => {
+  applyFilterVisibility();
+ });
+ document.getElementById("graphDepth").addEventListener("change", event => {
+  state.graphDepth = event.target.value;
+  applyFilterVisibility();
+  fitNetworkView();
+  addTimelineEvent("Graph depth changed", state.graphDepth === "all" ? "Full transaction graph restored." : `${state.graphDepth}-hop neighborhood shown.`);
+ });
+ document.getElementById("resetBtn").addEventListener("click", () => {
+  if (state.threeInitialized) controls.reset();
+  state.neighborhoodOnly = false;
+  state.evidenceFocus = null;
+  document.getElementById("nodeSearch").value = "";
+  document.getElementById("riskFilter").value = "all";
+  document.getElementById("graphDepth").value = "all";
+  state.graphDepth = "all";
+  applyFilterVisibility();
+  fitNetworkView();
+  select("TX-1048");
+  const neighborhoodButton = document.getElementById("focusNeighborhoodBtn");
+  neighborhoodButton.classList.remove("active-toggle");
+  neighborhoodButton.textContent = "Focus neighborhood";
+  toast("View reset.");
+ });
+ document.getElementById("clearSelBtn").addEventListener("click", () => {
+  document.getElementById("nodeSearch").value = "";
+  clearSelection();
+  toast("Selection cleared.");
+ });
+ document.getElementById("fitNetworkBtn").addEventListener("click", () => {
+  fitNetworkView(true);
+ });
+ document.getElementById("zoomInBtn").addEventListener("click", () => zoomNetwork(0.78));
+ document.getElementById("zoomOutBtn").addEventListener("click", () => zoomNetwork(1.28));
+ document.getElementById("toggleConnectionsBtn").addEventListener("click", () => {
+  state.showConnections = !state.showConnections;
+  edgeLines.forEach((line) => {
+   const a = line.userData.source, b = line.userData.target;
+   line.visible = state.showConnections && nodeMeshes.get(a)?.visible && nodeMeshes.get(b)?.visible;
+  });
+  edgeArrows.forEach((arrow) => {
+   const a = arrow.userData.source, b = arrow.userData.target;
+   arrow.visible = state.showConnections && nodeMeshes.get(a)?.visible && nodeMeshes.get(b)?.visible;
+  });
+  updateToggleButton("toggleConnectionsBtn", state.showConnections, "Connections");
+  toast(state.showConnections ? "Connections shown." : "Connections hidden.");
+ });
+ document.getElementById("toggleParticlesBtn").addEventListener("click", () => {
+  state.showParticles = !state.showParticles;
+  connectionParticles.forEach((ps) => scene.remove(ps));
+  if (state.showParticles) buildConnectionParticles();
+  updateToggleButton("toggleParticlesBtn", state.showParticles, "Particles");
+  toast(state.showParticles ? "Particle animation enabled." : "Particle animation disabled.");
+ });
+ document.getElementById("toggleLabelsBtn").addEventListener("click", () => {
+  state.showLabels = !state.showLabels;
+  if (state.showLabels) buildLabels();
+  else { labelSprites.forEach((s) => scene.remove(s)); labelSprites.clear(); }
+  updateToggleButton("toggleLabelsBtn", state.showLabels, "Labels");
+  toast(state.showLabels ? "Labels shown." : "Labels hidden.");
+ });
+ document.getElementById("focusNeighborhoodBtn").addEventListener("click", () => {
+  if (!state.selected) { toast("Select a transaction first."); return; }
+  state.neighborhoodOnly = !state.neighborhoodOnly;
+  applyFilterVisibility();
+  fitNetworkView();
+  const button = document.getElementById("focusNeighborhoodBtn");
+  button.classList.toggle("active-toggle", state.neighborhoodOnly);
+  button.textContent = state.neighborhoodOnly ? "Show full network" : "Focus neighborhood";
+  toast(state.neighborhoodOnly ? "Showing selected neighborhood." : "Showing full network.");
+ });
+ document.getElementById("explainRiskBtn").addEventListener("click", () => {
+  if (!state.selected) { toast("Select a transaction first."); return; }
+  focusOnNode(state.selected);
+  focusEvidence("network");
+  addTimelineEvent("Risk explanation generated", "Rule-based evidence signals were linked to the transaction graph.");
+  toast(`Risk explanation ready for ${state.selected}.`);
+ });
+ document.getElementById("clearEvidenceBtn").addEventListener("click", () => {
+  clearEvidenceFocus();
+  addTimelineEvent("Evidence focus cleared", "The full selected neighborhood is visible again.");
+  toast("Evidence focus cleared.");
+ });
+ document.getElementById("tracePathBtn").addEventListener("click", traceSuspiciousPath);
+ updateToggleButton("toggleConnectionsBtn", state.showConnections, "Connections");
+ updateToggleButton("toggleParticlesBtn", state.showParticles, "Particles");
+ updateToggleButton("toggleLabelsBtn", state.showLabels, "Labels");
+ document.getElementById("exportBtn").addEventListener("click", () => {
+  const n = nodeMap[state.selected];
+  if (!n) { toast("Please select a transaction first."); return; }
+  const cd = state.caseData[state.selected] || { status: 'unreviewed', notes: '', history: [] };
+  const { incoming: incMap, outgoing: outMap } = countEdgeDegrees();
+  const report = {
+   prototype: "TRACE-X",
+   notice: "Synthetic demonstration data only; not a model prediction or fraud finding.",
+   selectedTransaction: state.selected,
+   illustrativeRiskScore: n.risk,
+   amount: n.amount,
+   step: n.step,
+   totalConnections: (incMap.get(n.id) || 0) + (outMap.get(n.id) || 0),
+   reviewStatus: cd.status,
+   analystNotes: cd.notes,
+   pattern: patternFor(n),
+   metadata: { currency: n.currency, accountType: n.accountType, region: n.region, timestamp: n.timestamp, cluster: n.cluster },
+   riskNarrative: riskStoryFor(n),
+   evidence: evidenceFor(n).map(item => ({ title: item.title, detail: item.text, score: item.score })),
+   evidenceConfidence: evidenceFor(n).map(item => ({ title: item.title, confidence: item.confidence })),
+   priority: cd.priority || "standard",
+   assignee: cd.assignee || "",
+   checklist: cd.checklist || {},
+   tracedPath: state.tracePath,
+   investigationTimeline: state.timeline,
+   caseHistory: cd.history || [],
+   model: "Not connected",
+   explainer: "Not connected"
+  };
+  const blob = new Blob([JSON.stringify(report, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "TRACE-X-" + state.selected + "-demo-case.json";
+  a.click();
+  URL.revokeObjectURL(url);
+  toast("Case summary exported as JSON.");
+ });
+  setupDatasetUpload();
+ document.getElementById("saveStatusBtn").addEventListener("click", () => {
+  const sel = state.selected;
+  if (!sel) { toast("Please select a transaction first."); return; }
+  state.caseData[sel] = state.caseData[sel] || { status: 'unreviewed', notes: '', history: [] };
+  state.caseData[sel].status = document.getElementById("statusSelect").value;
+  state.caseData[sel].history = state.caseData[sel].history || [];
+  state.caseData[sel].history.unshift({ type: "status", value: state.caseData[sel].status, time: new Date().toISOString() });
+  persistCaseData();
+  updateInspector(nodeMap[sel]);
+  renderCases();
+  addTimelineEvent("Case status updated", `Transaction marked ${state.caseData[sel].status.replace("_", " ")}.`);
+  toast("Status saved.");
+ });
+ document.getElementById("saveNotesBtn").addEventListener("click", () => {
+  const sel = state.selected;
+  if (!sel) { toast("Please select a transaction first."); return; }
+  state.caseData[sel] = state.caseData[sel] || { status: 'unreviewed', notes: '', history: [] };
+  state.caseData[sel].notes = document.getElementById("notesField").value;
+  state.caseData[sel].history = state.caseData[sel].history || [];
+  state.caseData[sel].history.unshift({ type: "note", value: state.caseData[sel].notes, time: new Date().toISOString() });
+  persistCaseData();
+  renderCases();
+  addTimelineEvent("Analyst note saved", "A note was added to the selected transaction.");
+  toast("Notes saved.");
+ });
+ document.getElementById("saveInvestigationBtn").addEventListener("click", () => {
+  const sel = state.selected;
+  if (!sel) { toast("Please select a transaction first."); return; }
+  const record = state.caseData[sel] || { status: "unreviewed", notes: "", history: [] };
+  record.priority = document.getElementById("priorityField").value;
+  record.assignee = document.getElementById("assigneeField").value.trim();
+  record.checklist = Object.fromEntries([...document.querySelectorAll("[data-check]")].map(input => [input.dataset.check, input.checked]));
+  record.history = record.history || [];
+  record.history.unshift({ type: "investigation", value: `${record.priority} / ${record.assignee || "unassigned"}`, time: new Date().toISOString() });
+  state.caseData[sel] = record;
+  persistCaseData();
+  updateInspector(nodeMap[sel]);
+  renderCases();
+  addTimelineEvent("Investigation record saved", "Priority, reviewer assignment, and checklist state were saved locally.");
+  toast("Investigation record saved.");
+ });
+ document.querySelectorAll(".nav button").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll(".nav button").forEach(x => x.classList.remove("active"));
+  b.classList.add("active");
+  const v = b.dataset.view;
+  const t = { overview: "Investigation overview", network: "Transaction graph", explanations: "Explanation evidence", cases: "Investigation case queue" };
+  document.getElementById("pageTitle").textContent = t[v];
+  const target = { overview: null, network: "graphPanel", explanations: "evidencePanel", cases: "casePanel" }[v];
+  if (target) document.getElementById(target).scrollIntoView({ behavior: "smooth", block: "start" });
+  else window.scrollTo({ top: 0, behavior: "smooth" });
+ }));
+}
+
+function persistCaseData() {
+ try { localStorage.setItem("trace-x-case-data", JSON.stringify(state.caseData)); } catch (e) { console.warn("localStorage error", e); }
+}
+function restoreCaseData() {
+ try {
+  const raw = localStorage.getItem("trace-x-case-data");
+  if (raw) {
+   const parsed = JSON.parse(raw);
+   if (parsed && typeof parsed === "object") state.caseData = parsed;
+  }
+ } catch (e) {
+  console.warn("Failed to parse localStorage", e);
+  state.caseData = {};
+ }
+}
+
+function renderCases() {
+ const body = document.getElementById("caseRows");
+ const entries = Object.entries(state.caseData).filter(([id]) => nodeMap[id]);
+ if (entries.length === 0) {
+  body.innerHTML = '<tr><td colspan="7" class="empty-state">No flagged cases yet. Select a transaction and change its status to add it to the queue.</td></tr>';
+  return;
+ }
+ body.innerHTML = "";
+ entries.sort((a, b) => {
+  const pa = b[1].status === 'escalated' ? 1 : 0;
+  const pb = a[1].status === 'escalated' ? 1 : 0;
+  return pb - pa || (nodeMap[b[0]].risk - nodeMap[a[0]].risk);
+ });
+ entries.forEach(([id, data]) => {
+  const n = nodeMap[id];
+  const deg = (countEdgeDegrees().incoming.get(id) || 0) + (countEdgeDegrees().outgoing.get(id) || 0);
+  const band = n.risk >= 70 ? "high" : n.risk >= 45 ? "mid" : "low";
+  const tr = document.createElement("tr");
+  tr.innerHTML = `<td><span class="caseid">${id}</span></td>
+   <td><span class="badge-${band}">${n.risk}</span></td>
+   <td>${n.step}</td>
+   <td>${deg}</td>
+   <td>${data.status.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())}</td>
+   <td>${data.notes ? '✓' : '—'}</td>
+   <td><button class="btn" data-open="${id}" style="padding:4px 7px">Open</button><button class="btn" data-remove="${id}" style="padding:4px 7px;margin-left:4px">Remove</button></td>`;
+  body.appendChild(tr);
+ });
+ body.querySelectorAll("[data-open]").forEach(b => {
+  b.addEventListener("click", (e) => {
+   e.stopPropagation();
+   document.querySelector('.nav button[data-view="overview"]').click();
+   focusOnNode(b.dataset.open);
+  });
+ });
+ body.querySelectorAll("[data-remove]").forEach(b => {
+  b.addEventListener("click", (e) => {
+   e.stopPropagation();
+   if (confirm("Remove '" + b.dataset.remove + "' from the case queue?")) {
+    delete state.caseData[b.dataset.remove];
+    persistCaseData();
+    renderCases();
+    updateMetrics();
+    toast("Case removed from queue.");
+   }
+  });
+ });
+ updateMetrics();
+}
+
+function updateMetrics() {
+ document.getElementById("totalNodes").textContent = Object.keys(nodeMap).length;
+ document.getElementById("totalEdges").textContent = edges.length;
+ let highCount = 0;
+ Object.values(nodeMap).forEach(n => { if (n.risk >= 70) highCount++; });
+ document.getElementById("highCount").textContent = highCount;
+ const pending = Object.values(state.caseData).filter(c => c.status !== 'closed' && c.status !== 'unreviewed').length;
+ document.getElementById("pendingCount").textContent = String(Math.max(0, pending)).padStart(2, "0");
+}
+
+function initApp() {
+ restoreCaseData();
+ if (checkWebGL()) {
+  initThree();
+  buildEdges();
+  buildNodeMeshes();
+  buildConnectionParticles();
+  renderMiniMap();
+   fitNetworkView();
+   select("TX-1048");
+   render();
+ }
+ setupToolbar();
+ document.querySelectorAll(".panel,.metric,.phase-card").forEach((el, index) => {
+  el.classList.add("reveal");
+  setTimeout(() => el.classList.add("ready"), Math.min(650, index * 45));
+ });
+ updateMetrics();
+ renderCases();
+ document.getElementById('threejs-container').addEventListener('pointermove', onPointerMove);
+ document.getElementById('threejs-container').addEventListener('pointerdown', onPointerDown);
+ loadCurrentDataset().catch(error => toast(error.message));
+}
+initApp();
+</script>
+</body>
+</html>
