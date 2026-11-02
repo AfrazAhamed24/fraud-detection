@@ -54,6 +54,12 @@ waitress-serve --listen=*:8000 backend.app:app
 Uploaded datasets are held in memory and isolated by Flask session cookie.
 They are not persisted across process restarts or shared across workers.
 
-For separate frontend/backend hosting, set `window.TRACE_X_API_BASE` in
-`frontend/config.js` to the Render backend URL and set the Render environment
-variable `FRONTEND_ORIGIN` to the exact Vercel URL.
+For separate frontend/backend hosting, `frontend/config.js` points to the
+deployed Render backend:
+
+```javascript
+window.TRACE_X_API_BASE = "https://fraud-detection-7063.onrender.com";
+```
+
+Set the Render environment variable `FRONTEND_ORIGIN` to the exact Vercel URL
+before testing uploads from the deployed frontend.

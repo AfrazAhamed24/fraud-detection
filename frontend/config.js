@@ -1,2 +1,2 @@
-// Set this to the deployed Render backend URL before deploying the frontend.
-window.TRACE_X_API_BASE = "";
+// Render production API used by the Vercel frontend.
+window.TRACE_X_API_BASE = "https://fraud-detection-7063.onrender.com";
